@@ -153,6 +153,11 @@ export function openCallPanel(options: CallPanelOptions) {
               ${icons.copy(18)} ${currentRecord.phone}
             </button>
           ` : ''}
+          ${currentRecord.website ? html`
+            <a href="${currentRecord.website.startsWith('http') ? currentRecord.website : `https://${currentRecord.website}`}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" title="Web Sitesini Aç">
+              ${icons.globe(18)} Web Sitesi
+            </a>
+          ` : ''}
         </div>
 
         <!-- Kuruluş & İletişim Bilgileri Düzenleme -->
@@ -179,6 +184,11 @@ export function openCallPanel(options: CallPanelOptions) {
               <label class="form-label" for="inp-phone">Telefon Numarası</label>
               <input class="form-control" type="text" id="inp-phone" value="${currentRecord.phone || ''}" placeholder="+90212..." />
             </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="inp-website">Web Sitesi</label>
+            <input class="form-control" type="text" id="inp-website" value="${currentRecord.website || ''}" placeholder="www.ornek.org" />
           </div>
 
           <div class="form-group">
@@ -323,6 +333,7 @@ export function openCallPanel(options: CallPanelOptions) {
 
     const country = (drawer.querySelector('#inp-country') as HTMLInputElement)?.value;
     const city = (drawer.querySelector('#inp-city') as HTMLInputElement)?.value;
+    const website = (drawer.querySelector('#inp-website') as HTMLInputElement)?.value;
     const whatsapp = (drawer.querySelector('#inp-whatsapp') as HTMLInputElement)?.value;
     const phone = (drawer.querySelector('#inp-phone') as HTMLInputElement)?.value;
     const contact = (drawer.querySelector('#inp-contact') as HTMLInputElement)?.value;
@@ -346,6 +357,7 @@ export function openCallPanel(options: CallPanelOptions) {
       const res = await api.put(`organizations/${recordId}`, {
         country,
         city,
+        website: website || null,
         whatsapp,
         phone,
         contact_person: contact,

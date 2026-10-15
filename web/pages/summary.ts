@@ -3,6 +3,108 @@ import { api } from '../api.js';
 import { icons } from '../icons.js';
 import { showToast } from '../ui.js';
 
+function renderDonutChart(positive: number, negative: number, followup: number): string {
+  const total = positive + negative + followup;
+  if (total === 0) {
+    return `<div style="text-align: center; color: var(--text-muted); padding: 2.5rem;">Bu dönemde henüz görüşme kaydedilmemiş.</div>`;
+  }
+
+  const r = 58;
+  const c = 2 * Math.PI * r;
+  const successRate = Math.round((positive / total) * 100);
+
+  const pLen = (positive / total) * c;
+  const nLen = (negative / total) * c;
+  const fLen = (followup / total) * c;
+
+  let offset = 0;
+  const pOffset = -offset;
+  offset += pLen;
+  const nOffset = -offset;
+  offset += nLen;
+  const fOffset = -offset;
+
+  return `
+    <div style="display: flex; align-items: center; justify-content: center; gap: 1.5rem; flex-wrap: wrap; width: 100%;">
+      <div class="donut-wrapper">
+        <svg width="170" height="170" viewBox="0 0 170 170" style="transform: rotate(-90deg);">
+          <circle cx="85" cy="85" r="${r}" fill="none" stroke="var(--bg-muted)" stroke-width="18" />
+          ${positive > 0 ? `<circle cx="85" cy="85" r="${r}" fill="none" stroke="#10b981" stroke-width="18" stroke-dasharray="${pLen} ${c - pLen}" stroke-dashoffset="${pOffset}" />` : ''}
+          ${negative > 0 ? `<circle cx="85" cy="85" r="${r}" fill="none" stroke="#ef4444" stroke-width="18" stroke-dasharray="${nLen} ${c - nLen}" stroke-dashoffset="${nOffset}" />` : ''}
+          ${followup > 0 ? `<circle cx="85" cy="85" r="${r}" fill="none" stroke="#f59e0b" stroke-width="18" stroke-dasharray="${fLen} ${c - fLen}" stroke-dashoffset="${fOffset}" />` : ''}
+        </svg>
+        <div class="donut-center">
+          <div class="donut-center-val">%${successRate}</div>
+          <div class="donut-center-lbl">Başarı Oranı</div>
+        </div>
+      </div>
+      <div class="chart-legend">
+        <div class="legend-item">
+          <span class="legend-dot" style="background:#10b981;"></span>
+          <span class="legend-text">Olumlu:</span>
+          <span class="legend-val" style="color:#10b981;">${positive} (%${Math.round((positive / total) * 100)})</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot" style="background:#ef4444;"></span>
+          <span class="legend-text">Olumsuz:</span>
+          <span class="legend-val" style="color:#ef4444;">${negative} (%${Math.round((negative / total) * 100)})</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot" style="background:#f59e0b;"></span>
+          <span class="legend-text">Tekrar Görüşülecek:</span>
+          <span class="legend-val" style="color:#f59e0b;">${followup} (%${Math.round((followup / total) * 100)})</span>
+        </div>
+        <div class="legend-item" style="border-top: 1px solid var(--border-color); padding-top: 0.35rem; margin-top: 0.25rem;">
+          <span class="legend-text"><strong>Toplam Görüşme:</strong></span>
+          <span class="legend-val"><strong>${total}</strong></span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderStaffBars(staffList: any[]): string {
+  if (staffList.length === 0) {
+    return `<div style="text-align: center; color: var(--text-muted); padding: 2.5rem; width: 100%;">Kayıtlı aramacı bulunamadı.</div>`;
+  }
+  const maxCalls = Math.max(...staffList.map(s => s.total_calls || 0), 1);
+
+  return `
+    <div class="perf-bar-list">
+      ${staffList.map(s => {
+        const total = s.total_calls || 0;
+        const pos = s.positive_count || 0;
+        const neg = s.negative_count || 0;
+        const fol = s.followup_count || 0;
+        const rate = total > 0 ? Math.round((pos / total) * 100) : 0;
+        const trackWidthPct = Math.round((total / maxCalls) * 100);
+
+        const posPct = total > 0 ? (pos / total) * 100 : 0;
+        const negPct = total > 0 ? (neg / total) * 100 : 0;
+        const folPct = total > 0 ? (fol / total) * 100 : 0;
+
+        return `
+          <div class="perf-bar-row">
+            <div class="perf-bar-labels">
+              <span><strong>${s.full_name}</strong></span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">
+                <strong>${total}</strong> görüşme | <span style="color: #10b981; font-weight: 600;">%${rate} Başarı</span>
+              </span>
+            </div>
+            <div style="width: 100%; display: flex; align-items: center; gap: 0.5rem;">
+              <div class="perf-bar-track" style="width: ${Math.max(trackWidthPct, 6)}%;">
+                <div class="perf-bar-fill-positive" style="width: ${posPct}%;" title="Olumlu: ${pos}"></div>
+                <div class="perf-bar-fill-negative" style="width: ${negPct}%;" title="Olumsuz: ${neg}"></div>
+                <div class="perf-bar-fill-followup" style="width: ${folPct}%;" title="Tekrar Görüşme: ${fol}"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
 export function renderSummaryPage(container: HTMLElement, currentUser: any) {
   let summaryData: any[] = [];
   let startDate = new Date().toISOString().split('T')[0];
@@ -69,6 +171,31 @@ export function renderSummaryPage(container: HTMLElement, currentUser: any) {
         <div class="stat-card">
           <div class="stat-card-title">Bekleyen Görüşülmemiş</div>
           <div class="stat-card-value num">${totalUncontacted}</div>
+        </div>
+      </div>
+
+      <!-- Grafikler Bölümü -->
+      <div class="charts-grid" style="margin-bottom: 1.5rem;">
+        <!-- Grafik 1: Başarı / Başarısızlık Dağılımı (Donut Grafiği) -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">Görüşme Başarı & Dağılım Grafiği</div>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Dönem Toplamı</span>
+          </div>
+          <div class="chart-body">
+            ${raw(renderDonutChart(totalPositive, totalNegative, totalFollowup))}
+          </div>
+        </div>
+
+        <!-- Grafik 2: Personel Performans Karşılaştırma Grafiği -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">Personel Başarı Karşılaştırması</div>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Arama Hacmi & Dönüşüm</span>
+          </div>
+          <div class="chart-body" style="align-items: flex-start; justify-content: flex-start;">
+            ${raw(renderStaffBars(summaryData))}
+          </div>
         </div>
       </div>
 

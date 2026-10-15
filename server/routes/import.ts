@@ -47,6 +47,7 @@ const FIELD_KEYWORDS: Record<string, string[]> = {
   city: ['city', 'şehir', 'sehir', 'il'],
   whatsapp: ['whatsapp', 'whatsapp number', 'wa', 'whatsapp no', 'wp'],
   phone: ['phone', 'telephone', 'tel', 'telefon', 'phone number', 'gsm', 'cep'],
+  website: ['website', 'web', 'web sitesi', 'site', 'url', 'web adresi', 'web_adresi', 'internet sitesi'],
   contact_person: [
     'contact', 'contact person', 'contact name', 'yetkili',
     'görüşülen kişi', 'gorusulen kisi', 'ilgili kişi', 'ilgili kisi', 'kişi', 'kisi'
@@ -262,11 +263,11 @@ export const importRoutes: FastifyPluginAsync = async (fastify) => {
 
       const insertOrgStmt = db.prepare(`
         INSERT INTO organizations (
-          list_id, organization_name, country, city, whatsapp, phone, contact_person,
+          list_id, organization_name, country, city, whatsapp, phone, website, contact_person,
           assigned_to, assigned_at, status, note, last_contact_date, last_contact_by,
           follow_up_date, created_at, updated_at, search_text, name_sort, whatsapp_normalized
         ) VALUES (
-          ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?,
           NULL, NULL, NULL, NULL, NULL, NULL,
           NULL, ?, ?, ?, ?, ?
         )
@@ -296,6 +297,7 @@ export const importRoutes: FastifyPluginAsync = async (fastify) => {
         const city = mapping.city != null && row[mapping.city] ? String(row[mapping.city]).trim() : null;
         let rawWhatsapp = mapping.whatsapp != null && row[mapping.whatsapp] ? String(row[mapping.whatsapp]).trim() : null;
         let rawPhone = mapping.phone != null && row[mapping.phone] ? String(row[mapping.phone]).trim() : null;
+        const website = mapping.website != null && row[mapping.website] ? String(row[mapping.website]).trim() : null;
         const contactPerson = mapping.contact_person != null && row[mapping.contact_person] ? String(row[mapping.contact_person]).trim() : null;
 
         // Bilimsel gösterim kontrolü (örn. 9.05E+11)
@@ -349,6 +351,7 @@ export const importRoutes: FastifyPluginAsync = async (fastify) => {
           city,
           rawWhatsapp,
           rawPhone,
+          website,
           contactPerson,
           createdAt,
           createdAt,

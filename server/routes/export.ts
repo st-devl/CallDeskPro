@@ -104,7 +104,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
     const querySql = `
       SELECT 
         o.id, o.organization_name, o.country, o.city,
-        o.whatsapp, o.phone, o.contact_person, o.status, o.note,
+        o.website, o.whatsapp, o.phone, o.contact_person, o.status, o.note,
         o.last_contact_date, o.follow_up_date,
         u_assigned.full_name as assigned_name,
         l.name as list_name
@@ -178,6 +178,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
         <th style="width: 30px;">#</th>
         <th>Kuruluş Adı</th>
         <th>Ülke / Şehir</th>
+        <th>Web Sitesi</th>
         <th>WhatsApp</th>
         <th>Telefon</th>
         <th>Görüşülen Kişi</th>
@@ -185,7 +186,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
         <th>Son Görüşme</th>
         <th>Tekrar Görüşme</th>
         ${user.role === 'admin' ? '<th>Atanan Aramacı</th>' : ''}
-        <th style="width: 25%;">Not</th>
+        <th style="width: 20%;">Not</th>
       </tr>
     </thead>
     <tbody>
@@ -206,6 +207,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
         <td>${rowIdx++}</td>
         <td><strong>${escapeHtml(row.organization_name)}</strong></td>
         <td>${escapeHtml(row.country || '-')}${row.city ? ` / ${escapeHtml(row.city)}` : ''}</td>
+        <td>${row.website ? `<a href="${escapeHtml(row.website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(row.website)}</a>` : '-'}</td>
         <td>${escapeHtml(row.whatsapp || '-')}</td>
         <td>${escapeHtml(row.phone || '-')}</td>
         <td>${escapeHtml(row.contact_person || '-')}</td>

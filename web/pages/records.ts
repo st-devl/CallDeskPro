@@ -11,6 +11,23 @@ export function renderRecordsPage(container: HTMLElement, currentUser: any) {
   let pagination = { page: 1, limit: 50, total: 0, total_pages: 1 };
   let isLoading = false;
 
+  const AGENT_COLUMNS = [
+    { id: 'col-location', label: 'Ülke / Şehir' },
+    { id: 'col-website', label: 'Web Sitesi' },
+    { id: 'col-whatsapp', label: 'WhatsApp' },
+    { id: 'col-phone', label: 'Telefon' },
+    { id: 'col-contact', label: 'Görüşülen Kişi' },
+    { id: 'col-status', label: 'Sonuç' },
+    { id: 'col-last-contact', label: 'Son Görüşme' },
+    { id: 'col-followup', label: 'Tekrar Görüşme' }
+  ];
+
+  let hiddenCols = new Set<string>();
+  try {
+    const saved = localStorage.getItem('cc_hidden_cols_agent');
+    if (saved) hiddenCols = new Set(JSON.parse(saved));
+  } catch {}
+
   // Aktif filtreler
   const currentFilters = {
     search: '',
@@ -184,6 +201,24 @@ export function renderRecordsPage(container: HTMLElement, currentUser: any) {
           <button type="button" class="btn btn-secondary" id="btn-clear-filters" title="Filtreleri Temizle">
             Filtreleri Temizle
           </button>
+
+          <!-- Sütunları Yönet Dropdown -->
+          <div class="columns-dropdown-wrapper" style="margin-left: auto;">
+            <button type="button" class="btn btn-secondary" id="btn-toggle-columns" title="Görünür sütunları seç veya gizle">
+              ${icons.columns(16)} Sütunlar
+            </button>
+            <div class="columns-dropdown-menu" id="columns-menu">
+              <div class="columns-menu-header">
+                <span>Sütunları Göster / Gizle</span>
+              </div>
+              ${AGENT_COLUMNS.map(col => html`
+                <label class="columns-menu-item">
+                  <input type="checkbox" class="col-toggle-checkbox" data-col="${col.id}" ${hiddenCols.has(col.id) ? '' : 'checked'} />
+                  <span>${col.label}</span>
+                </label>
+              `)}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -194,50 +229,58 @@ export function renderRecordsPage(container: HTMLElement, currentUser: any) {
             <tr>
               <th style="width: 50px;">Sıra</th>
               <th>Kuruluş Adı</th>
-              <th>Ülke / Şehir</th>
-              <th>WhatsApp</th>
-              <th>Telefon</th>
-              <th>Görüşülen Kişi</th>
-              <th>Sonuç</th>
-              <th>Son Görüşme</th>
-              <th>Tekrar Görüşme</th>
+              <th class="col-location ${hiddenCols.has('col-location') ? 'col-hidden' : ''}">Ülke / Şehir</th>
+              <th class="col-website ${hiddenCols.has('col-website') ? 'col-hidden' : ''}">Web Sitesi</th>
+              <th class="col-whatsapp ${hiddenCols.has('col-whatsapp') ? 'col-hidden' : ''}">WhatsApp</th>
+              <th class="col-phone ${hiddenCols.has('col-phone') ? 'col-hidden' : ''}">Telefon</th>
+              <th class="col-contact ${hiddenCols.has('col-contact') ? 'col-hidden' : ''}">Görüşülen Kişi</th>
+              <th class="col-status ${hiddenCols.has('col-status') ? 'col-hidden' : ''}">Sonuç</th>
+              <th class="col-last-contact ${hiddenCols.has('col-last-contact') ? 'col-hidden' : ''}">Son Görüşme</th>
+              <th class="col-followup ${hiddenCols.has('col-followup') ? 'col-hidden' : ''}">Tekrar Görüşme</th>
             </tr>
           </thead>
           <tbody>
             ${isLoading ? html`
-              <tr><td colspan="9" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">Yükleniyor...</td></tr>
+              <tr><td colspan="10" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">Yükleniyor...</td></tr>
             ` : records.length === 0 ? html`
-              <tr><td colspan="9" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">Filtreye uygun kayıt bulunamadı.</td></tr>
+              <tr><td colspan="10" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">Filtreye uygun kayıt bulunamadı.</td></tr>
             ` : records.map((r, idx) => html`
               <tr class="clickable-row" data-id="${r.id}">
                 <td class="num" style="color: var(--text-muted);">${(pagination.page - 1) * pagination.limit + idx + 1}</td>
                 <td><strong>${r.organization_name}</strong></td>
-                <td>${r.country || '-'}${r.city ? ` / ${r.city}` : ''}</td>
-                <td>
-                  ${r.whatsapp ? html`
-                    <button type="button" class="btn-icon btn-wa-quick" data-phone="${r.whatsapp}" title="WhatsApp ile İletişim">
-                      ${icons.whatsapp(18)}
-                    </button>
+                <td class="col-location ${hiddenCols.has('col-location') ? 'col-hidden' : ''}">${r.country || '-'}${r.city ? ` / ${r.city}` : ''}</td>
+                <td class="col-website ${hiddenCols.has('col-website') ? 'col-hidden' : ''}">
+                  ${r.website ? html`
+                    <a href="${r.website.startsWith('http') ? r.website : `https://${r.website}`}" target="_blank" rel="noopener noreferrer" class="website-link no-row-click" title="${r.website}">
+                      ${icons.globe(14)} <span>${r.website.replace(/^https?:\/\/(www\.)?/, '')}</span>
+                    </a>
                   ` : '-'}
                 </td>
-                <td>
+                <td class="col-whatsapp ${hiddenCols.has('col-whatsapp') ? 'col-hidden' : ''}">
+                  ${r.whatsapp ? html`
+                    <a href="https://wa.me/${r.whatsapp.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener noreferrer" class="btn-icon btn-wa-quick no-row-click" title="WhatsApp ile İletişim" style="color: #25d366; text-decoration: none;">
+                      ${icons.whatsapp(18)}
+                    </a>
+                  ` : '-'}
+                </td>
+                <td class="col-phone ${hiddenCols.has('col-phone') ? 'col-hidden' : ''}">
                   ${r.phone ? html`
                     <div style="display: inline-flex; align-items: center; gap: 0.35rem;">
                       <span class="phone-num">${r.phone}</span>
-                      <button type="button" class="btn-icon btn-copy-quick" data-phone="${r.phone}" title="Telefonu Kopyala">
+                      <button type="button" class="btn-icon btn-copy-quick no-row-click" data-phone="${r.phone}" title="Telefonu Kopyala">
                         ${icons.copy(14)}
                       </button>
                     </div>
                   ` : '-'}
                 </td>
-                <td>${r.contact_person || '-'}</td>
-                <td>
+                <td class="col-contact ${hiddenCols.has('col-contact') ? 'col-hidden' : ''}">${r.contact_person || '-'}</td>
+                <td class="col-status ${hiddenCols.has('col-status') ? 'col-hidden' : ''}">
                   <span class="badge ${r.status === 'positive' ? 'badge-positive' : r.status === 'negative' ? 'badge-negative' : r.status === 'follow_up' ? 'badge-followup' : 'badge-neutral'}">
                     ${r.status === 'positive' ? 'Olumlu' : r.status === 'negative' ? 'Olumsuz' : r.status === 'follow_up' ? 'Tekrar Görüşülecek' : 'Görüşülmedi'}
                   </span>
                 </td>
-                <td class="num">${r.last_contact_date ? r.last_contact_date : '-'}</td>
-                <td class="num">${r.follow_up_date ? r.follow_up_date : '-'}</td>
+                <td class="num col-last-contact ${hiddenCols.has('col-last-contact') ? 'col-hidden' : ''}">${r.last_contact_date ? r.last_contact_date : '-'}</td>
+                <td class="num col-followup ${hiddenCols.has('col-followup') ? 'col-hidden' : ''}">${r.follow_up_date ? r.follow_up_date : '-'}</td>
               </tr>
             `)}
           </tbody>
@@ -261,6 +304,47 @@ export function renderRecordsPage(container: HTMLElement, currentUser: any) {
     `;
 
     // Etkileşimler
+    // Sütunları Yönet Menüsü Etkileşimleri
+    const colBtn = container.querySelector('#btn-toggle-columns');
+    const colMenu = container.querySelector('#columns-menu');
+
+    colBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      colMenu?.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!colMenu?.contains(e.target as Node) && e.target !== colBtn) {
+        colMenu?.classList.remove('active');
+      }
+    });
+
+    container.querySelectorAll('.col-toggle-checkbox').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        const colId = (cb as HTMLElement).dataset.col!;
+        const checked = (e.target as HTMLInputElement).checked;
+
+        if (checked) {
+          hiddenCols.delete(colId);
+        } else {
+          hiddenCols.add(colId);
+        }
+
+        try {
+          localStorage.setItem('cc_hidden_cols_agent', JSON.stringify([...hiddenCols]));
+        } catch {}
+
+        // Tablodaki hücreleri anında gizle veya göster
+        container.querySelectorAll(`.${colId}`).forEach(el => {
+          if (checked) {
+            el.classList.remove('col-hidden');
+          } else {
+            el.classList.add('col-hidden');
+          }
+        });
+      });
+    });
+
     container.querySelector('#btn-next-lead')?.addEventListener('click', fetchNextRecord);
 
     // Satıra tıklama -> Görüşme Panelini Aç

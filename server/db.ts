@@ -66,6 +66,7 @@ export function initDatabase(dbPath: string): Database.Database {
         city TEXT,
         whatsapp TEXT,
         phone TEXT,
+        website TEXT,
         contact_person TEXT,
         assigned_to INTEGER REFERENCES users(id) ON DELETE SET NULL,
         assigned_at TEXT,
@@ -111,8 +112,19 @@ export function initDatabase(dbPath: string): Database.Database {
 
       INSERT OR IGNORE INTO settings (key, value) VALUES ('uncontacted_limit', '1');
 
-      PRAGMA user_version = 1;
+      PRAGMA user_version = 2;
     `);
+  }
+
+  // user_version kontrolü ve geriye dönük migration (website kolonu)
+  const currentVersion = db.pragma('user_version', { simple: true }) as number;
+  if (currentVersion < 2) {
+    const tableInfo = db.prepare("PRAGMA table_info(organizations)").all() as Array<{ name: string }>;
+    const hasWebsite = tableInfo.some((col) => col.name === 'website');
+    if (!hasWebsite) {
+      db.exec(`ALTER TABLE organizations ADD COLUMN website TEXT;`);
+    }
+    db.pragma('user_version = 2');
   }
 
   // Manuel kayıtlar için varsayılan liste oluştur

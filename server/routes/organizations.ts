@@ -103,7 +103,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
     const uncontactedLimit = parseInt(limitSetting?.value || '1', 10);
 
     const uncontacted = db.prepare(`
-      SELECT id, organization_name, country, city, whatsapp, phone, contact_person, status, note, updated_at
+      SELECT id, organization_name, country, city, whatsapp, phone, website, contact_person, status, note, updated_at
       FROM organizations
       WHERE assigned_to = ? AND status IS NULL
       ORDER BY id ASC
@@ -147,7 +147,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       return db.prepare(`
-        SELECT id, organization_name, country, city, whatsapp, phone, contact_person, status, note, updated_at
+        SELECT id, organization_name, country, city, whatsapp, phone, website, contact_person, status, note, updated_at
         FROM organizations
         WHERE id = ?
       `).get(nextRow.id) as any;
@@ -257,7 +257,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
     const dataSql = `
       SELECT 
         o.id, o.list_id, o.organization_name, o.country, o.city,
-        o.whatsapp, o.phone, o.contact_person, o.assigned_to, o.assigned_at,
+        o.whatsapp, o.phone, o.website, o.contact_person, o.assigned_to, o.assigned_at,
         o.status, o.note, o.last_contact_date, o.follow_up_date,
         o.updated_at,
         u_assigned.full_name as assigned_name,
@@ -334,6 +334,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
       city,
       whatsapp,
       phone,
+      website,
       contact_person,
       status,
       note,
@@ -368,6 +369,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
     const finalCity = city != null ? String(city).trim() : currentRecord.city;
     const finalWhatsapp = whatsapp != null ? String(whatsapp).trim() : currentRecord.whatsapp;
     const finalPhone = phone != null ? String(phone).trim() : currentRecord.phone;
+    const finalWebsite = website != null ? String(website).trim() : currentRecord.website;
     const finalContact = contact_person != null ? String(contact_person).trim() : currentRecord.contact_person;
 
     // Durum ve takip tarihi kontrolü
@@ -398,6 +400,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
           city = ?,
           whatsapp = ?,
           phone = ?,
+          website = ?,
           contact_person = ?,
           status = ?,
           note = ?,
@@ -415,6 +418,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
         finalCity,
         finalWhatsapp,
         finalPhone,
+        finalWebsite,
         finalContact,
         finalStatus,
         note || currentRecord.note,
@@ -455,7 +459,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.status(403).send({ error: 'Yalnızca yöneticiler yeni kayıt ekleyebilir' });
     }
 
-    const { organization_name, country, city, whatsapp, phone, contact_person, assigned_to } = (request.body as any) || {};
+    const { organization_name, country, city, whatsapp, phone, website, contact_person, assigned_to } = (request.body as any) || {};
 
     if (!organization_name || !String(organization_name).trim()) {
       return reply.status(400).send({ error: 'Kuruluş adı zorunludur' });
@@ -473,6 +477,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
     const cleanCity = city ? String(city).trim() : null;
     const cleanWhatsapp = whatsapp ? String(whatsapp).trim() : null;
     const cleanPhone = phone ? String(phone).trim() : null;
+    const cleanWebsite = website ? String(website).trim() : null;
     const cleanContact = contact_person ? String(contact_person).trim() : null;
 
     const whatsappNormalized = normalizePhoneDigits(cleanWhatsapp || cleanPhone);
@@ -493,11 +498,11 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
 
     const result = db.prepare(`
       INSERT INTO organizations (
-        list_id, organization_name, country, city, whatsapp, phone, contact_person,
+        list_id, organization_name, country, city, whatsapp, phone, website, contact_person,
         assigned_to, assigned_at, status, note, last_contact_date, last_contact_by,
         follow_up_date, created_at, updated_at, search_text, name_sort, whatsapp_normalized
       ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?, ?,
         ?, ?, NULL, NULL, NULL, NULL,
         NULL, ?, ?, ?, ?, ?
       )
@@ -508,6 +513,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
       cleanCity,
       cleanWhatsapp,
       cleanPhone,
+      cleanWebsite,
       cleanContact,
       assignedUserId,
       assignedAt,

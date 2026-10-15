@@ -13,6 +13,23 @@ export function renderAdminRecordsPage(container: HTMLElement, currentUser: any)
   let selectedIds = new Set<number>();
   let isLoading = false;
 
+  const ADMIN_COLUMNS = [
+    { id: 'col-location', label: 'Ülke / Şehir' },
+    { id: 'col-website', label: 'Web Sitesi' },
+    { id: 'col-whatsapp', label: 'WhatsApp' },
+    { id: 'col-phone', label: 'Telefon' },
+    { id: 'col-contact', label: 'Yetkili Kişi' },
+    { id: 'col-status', label: 'Sonuç' },
+    { id: 'col-assigned', label: 'Atanan Aramacı' },
+    { id: 'col-last-contact', label: 'Son Görüşme' }
+  ];
+
+  let hiddenCols = new Set<string>();
+  try {
+    const saved = localStorage.getItem('cc_hidden_cols_admin');
+    if (saved) hiddenCols = new Set(JSON.parse(saved));
+  } catch {}
+
   const currentFilters = {
     search: '',
     country: '',
@@ -87,6 +104,24 @@ export function renderAdminRecordsPage(container: HTMLElement, currentUser: any)
           <button type="button" class="btn btn-secondary" id="btn-export-html" title="Filtrelenen kayıtları internetsiz çalışan tek dosya HTML olarak indir">
             ${icons.download(18)} HTML Dışa Aktar
           </button>
+
+          <!-- Sütunları Yönet Dropdown -->
+          <div class="columns-dropdown-wrapper">
+            <button type="button" class="btn btn-secondary" id="btn-toggle-columns" title="Görünür sütunları seç veya gizle">
+              ${icons.columns(16)} Sütunlar
+            </button>
+            <div class="columns-dropdown-menu" id="columns-menu">
+              <div class="columns-menu-header">
+                <span>Sütunları Göster / Gizle</span>
+              </div>
+              ${ADMIN_COLUMNS.map(col => html`
+                <label class="columns-menu-item">
+                  <input type="checkbox" class="col-toggle-checkbox" data-col="${col.id}" ${hiddenCols.has(col.id) ? '' : 'checked'} />
+                  <span>${col.label}</span>
+                </label>
+              `)}
+            </div>
+          </div>
         </div>
 
         <!-- Toplu İşlem Çubuğu -->
@@ -167,20 +202,22 @@ export function renderAdminRecordsPage(container: HTMLElement, currentUser: any)
               </th>
               <th style="width: 45px;">Sıra</th>
               <th>Kuruluş Adı</th>
-              <th>Ülke / Şehir</th>
-              <th>WhatsApp / Telefon</th>
-              <th>Yetkili</th>
-              <th>Sonuç</th>
-              <th>Atanan Aramacı</th>
-              <th>Son Görüşme</th>
+              <th class="col-location ${hiddenCols.has('col-location') ? 'col-hidden' : ''}">Ülke / Şehir</th>
+              <th class="col-website ${hiddenCols.has('col-website') ? 'col-hidden' : ''}">Web Sitesi</th>
+              <th class="col-whatsapp ${hiddenCols.has('col-whatsapp') ? 'col-hidden' : ''}">WhatsApp</th>
+              <th class="col-phone ${hiddenCols.has('col-phone') ? 'col-hidden' : ''}">Telefon</th>
+              <th class="col-contact ${hiddenCols.has('col-contact') ? 'col-hidden' : ''}">Yetkili</th>
+              <th class="col-status ${hiddenCols.has('col-status') ? 'col-hidden' : ''}">Sonuç</th>
+              <th class="col-assigned ${hiddenCols.has('col-assigned') ? 'col-hidden' : ''}">Atanan Aramacı</th>
+              <th class="col-last-contact ${hiddenCols.has('col-last-contact') ? 'col-hidden' : ''}">Son Görüşme</th>
               <th style="text-align: right;">İşlem</th>
             </tr>
           </thead>
           <tbody>
             ${isLoading ? html`
-              <tr><td colspan="10" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">Yükleniyor...</td></tr>
+              <tr><td colspan="12" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">Yükleniyor...</td></tr>
             ` : records.length === 0 ? html`
-              <tr><td colspan="10" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">Kayıt bulunamadı.</td></tr>
+              <tr><td colspan="12" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">Kayıt bulunamadı.</td></tr>
             ` : records.map((r, idx) => html`
               <tr class="clickable-row" data-id="${r.id}">
                 <td style="text-align: center;" class="no-row-click">
@@ -188,23 +225,43 @@ export function renderAdminRecordsPage(container: HTMLElement, currentUser: any)
                 </td>
                 <td class="num" style="color: var(--text-muted);">${(pagination.page - 1) * pagination.limit + idx + 1}</td>
                 <td><strong>${r.organization_name}</strong><br><small style="color:var(--text-muted);">${r.list_name || ''}</small></td>
-                <td>${r.country || '-'}${r.city ? ` / ${r.city}` : ''}</td>
-                <td>
-                  ${r.whatsapp ? html`<span class="phone-num" style="color:#25d366;">${r.whatsapp}</span>` : ''}
-                  ${r.phone ? html`<br><span class="phone-num" style="font-size:0.75rem; color:var(--text-muted);">${r.phone}</span>` : ''}
+                <td class="col-location ${hiddenCols.has('col-location') ? 'col-hidden' : ''}">${r.country || '-'}${r.city ? ` / ${r.city}` : ''}</td>
+                <td class="col-website ${hiddenCols.has('col-website') ? 'col-hidden' : ''}">
+                  ${r.website ? html`
+                    <a href="${r.website.startsWith('http') ? r.website : `https://${r.website}`}" target="_blank" rel="noopener noreferrer" class="website-link no-row-click" title="${r.website}">
+                      ${icons.globe(14)} <span>${r.website.replace(/^https?:\/\/(www\.)?/, '')}</span>
+                    </a>
+                  ` : '-'}
                 </td>
-                <td>${r.contact_person || '-'}</td>
-                <td>
+                <td class="col-whatsapp ${hiddenCols.has('col-whatsapp') ? 'col-hidden' : ''}">
+                  ${r.whatsapp ? html`
+                    <a href="https://wa.me/${r.whatsapp.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener noreferrer" class="no-row-click" style="display:inline-flex; align-items:center; gap:0.25rem; color:#25d366; text-decoration:none; font-weight:500;" title="WhatsApp ile İletişim">
+                      ${icons.whatsapp(16)} <span class="phone-num" style="font-size:0.8125rem;">${r.whatsapp}</span>
+                    </a>
+                  ` : '-'}
+                </td>
+                <td class="col-phone ${hiddenCols.has('col-phone') ? 'col-hidden' : ''}">
+                  ${r.phone ? html`
+                    <div style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                      <span class="phone-num">${r.phone}</span>
+                      <button type="button" class="btn-icon btn-copy-quick no-row-click" data-phone="${r.phone}" title="Telefonu Kopyala">
+                        ${icons.copy(14)}
+                      </button>
+                    </div>
+                  ` : '-'}
+                </td>
+                <td class="col-contact ${hiddenCols.has('col-contact') ? 'col-hidden' : ''}">${r.contact_person || '-'}</td>
+                <td class="col-status ${hiddenCols.has('col-status') ? 'col-hidden' : ''}">
                   <span class="badge ${r.status === 'positive' ? 'badge-positive' : r.status === 'negative' ? 'badge-negative' : r.status === 'follow_up' ? 'badge-followup' : 'badge-neutral'}">
                     ${r.status === 'positive' ? 'Olumlu' : r.status === 'negative' ? 'Olumsuz' : r.status === 'follow_up' ? 'Tekrar Görüşülecek' : 'Görüşülmedi'}
                   </span>
                 </td>
-                <td>
+                <td class="col-assigned ${hiddenCols.has('col-assigned') ? 'col-hidden' : ''}">
                   ${r.assigned_name
                     ? html`<span style="font-weight: 500;">${r.assigned_name}</span>`
                     : html`<span style="color: var(--secondary); font-style: italic;">Havuzda</span>`}
                 </td>
-                <td class="num">${r.last_contact_date || '-'}</td>
+                <td class="num col-last-contact ${hiddenCols.has('col-last-contact') ? 'col-hidden' : ''}">${r.last_contact_date || '-'}</td>
                 <td style="text-align: right;" class="no-row-click">
                   <button type="button" class="btn-icon btn-admin-delete" data-id="${r.id}" data-name="${r.organization_name}" title="Sil">
                     ${icons.trash(16)}
@@ -227,6 +284,47 @@ export function renderAdminRecordsPage(container: HTMLElement, currentUser: any)
         </div>
       </div>
     `;
+
+    // Sütunları Yönet Menüsü Etkileşimleri
+    const colBtn = container.querySelector('#btn-toggle-columns');
+    const colMenu = container.querySelector('#columns-menu');
+
+    colBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      colMenu?.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!colMenu?.contains(e.target as Node) && e.target !== colBtn) {
+        colMenu?.classList.remove('active');
+      }
+    });
+
+    container.querySelectorAll('.col-toggle-checkbox').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        const colId = (cb as HTMLElement).dataset.col!;
+        const checked = (e.target as HTMLInputElement).checked;
+
+        if (checked) {
+          hiddenCols.delete(colId);
+        } else {
+          hiddenCols.add(colId);
+        }
+
+        try {
+          localStorage.setItem('cc_hidden_cols_admin', JSON.stringify([...hiddenCols]));
+        } catch {}
+
+        // Tablodaki hücreleri canlı olarak gizle veya göster
+        container.querySelectorAll(`.${colId}`).forEach(el => {
+          if (checked) {
+            el.classList.remove('col-hidden');
+          } else {
+            el.classList.add('col-hidden');
+          }
+        });
+      });
+    });
 
     // Checkbox İşlemleri
     container.querySelector('#check-all')?.addEventListener('change', (e) => {
@@ -458,6 +556,11 @@ export function renderAdminRecordsPage(container: HTMLElement, currentUser: any)
               </div>
             </div>
 
+            <div class="form-group">
+              <label class="form-label" for="new-website">Web Sitesi</label>
+              <input class="form-control" type="text" id="new-website" placeholder="www.ornek.org" />
+            </div>
+
             <div class="form-row">
               <div class="form-group flex-1">
                 <label class="form-label" for="new-wa">WhatsApp Numarası</label>
@@ -505,6 +608,7 @@ export function renderAdminRecordsPage(container: HTMLElement, currentUser: any)
       const organization_name = (modalBackdrop.querySelector('#new-org-name') as HTMLInputElement).value.trim();
       const country = (modalBackdrop.querySelector('#new-country') as HTMLInputElement).value.trim();
       const city = (modalBackdrop.querySelector('#new-city') as HTMLInputElement).value.trim();
+      const website = (modalBackdrop.querySelector('#new-website') as HTMLInputElement).value.trim();
       const whatsapp = (modalBackdrop.querySelector('#new-wa') as HTMLInputElement).value.trim();
       const phone = (modalBackdrop.querySelector('#new-phone') as HTMLInputElement).value.trim();
       const contact_person = (modalBackdrop.querySelector('#new-contact') as HTMLInputElement).value.trim();
@@ -516,6 +620,7 @@ export function renderAdminRecordsPage(container: HTMLElement, currentUser: any)
           organization_name,
           country,
           city,
+          website: website || null,
           whatsapp,
           phone,
           contact_person,
