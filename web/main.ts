@@ -41,47 +41,54 @@ function renderAppShell(contentRenderer: (container: HTMLElement) => void, activ
     return;
   }
 
+  const isCollapsed = localStorage.getItem('cc_sidebar_collapsed') === 'true';
+
   appEl.innerHTML = html`
     <div class="app-layout">
       <!-- Kenar Çubuğu (Sidebar) -->
-      <aside class="app-sidebar">
+      <aside class="app-sidebar ${isCollapsed ? 'collapsed' : ''}" id="app-sidebar">
         <div class="sidebar-header">
-          ${icons.phone(22)}
-          <span class="sidebar-logo">CALL CENTER</span>
+          <div class="sidebar-brand">
+            ${icons.phone(20)}
+            <span class="sidebar-logo">CALL CENTER</span>
+          </div>
+          <button type="button" class="btn-sidebar-toggle" id="btn-sidebar-toggle" title="${isCollapsed ? 'Menüyü Genişlet' : 'Menüyü Daralt'}">
+            ${isCollapsed ? icons.chevronRight(18) : icons.chevronLeft(18)}
+          </button>
         </div>
 
         <nav class="sidebar-nav">
           ${currentUser.role === 'agent'
             ? html`
-                <a href="#/kayitlarim" class="nav-item ${activeNav === 'kayitlarim' ? 'active' : ''}">
-                  ${icons.lists(18)} Kayıtlarım
+                <a href="#/kayitlarim" class="nav-item ${activeNav === 'kayitlarim' ? 'active' : ''}" title="Kayıtlarım">
+                  ${icons.lists(18)} <span class="nav-text">Kayıtlarım</span>
                 </a>
               `
             : html`
-                <a href="#/kayitlar" class="nav-item ${activeNav === 'kayitlar' ? 'active' : ''}">
-                  ${icons.lists(18)} Kayıtlar
+                <a href="#/kayitlar" class="nav-item ${activeNav === 'kayitlar' ? 'active' : ''}" title="Kayıtlar">
+                  ${icons.lists(18)} <span class="nav-text">Kayıtlar</span>
                 </a>
-                <a href="#/listeler" class="nav-item ${activeNav === 'listeler' ? 'active' : ''}">
-                  ${icons.filter(18)} Listeler
+                <a href="#/listeler" class="nav-item ${activeNav === 'listeler' ? 'active' : ''}" title="Listeler">
+                  ${icons.filter(18)} <span class="nav-text">Listeler</span>
                 </a>
-                <a href="#/kullanicilar" class="nav-item ${activeNav === 'kullanicilar' ? 'active' : ''}">
-                  ${icons.user(18)} Kullanıcılar
+                <a href="#/kullanicilar" class="nav-item ${activeNav === 'kullanicilar' ? 'active' : ''}" title="Kullanıcılar">
+                  ${icons.user(18)} <span class="nav-text">Kullanıcılar</span>
                 </a>
-                <a href="#/gorusmeler" class="nav-item ${activeNav === 'gorusmeler' ? 'active' : ''}">
-                  ${icons.history(18)} Görüşme Kayıtları
+                <a href="#/gorusmeler" class="nav-item ${activeNav === 'gorusmeler' ? 'active' : ''}" title="Görüşme Kayıtları">
+                  ${icons.history(18)} <span class="nav-text">Görüşme Kayıtları</span>
                 </a>
-                <a href="#/ozet" class="nav-item ${activeNav === 'ozet' ? 'active' : ''}">
-                  ${icons.summary(18)} Özet & Performans
+                <a href="#/ozet" class="nav-item ${activeNav === 'ozet' ? 'active' : ''}" title="Özet & Performans">
+                  ${icons.summary(18)} <span class="nav-text">Özet & Performans</span>
                 </a>
               `}
 
-          <a href="#/ayarlar" class="nav-item ${activeNav === 'ayarlar' ? 'active' : ''}">
-            ${icons.settings(18)} Ayarlar
+          <a href="#/ayarlar" class="nav-item ${activeNav === 'ayarlar' ? 'active' : ''}" title="Ayarlar">
+            ${icons.settings(18)} <span class="nav-text">Ayarlar</span>
           </a>
         </nav>
 
         <div class="sidebar-footer">
-          <div class="user-profile">
+          <div class="user-profile" title="${currentUser.full_name} (${currentUser.role === 'admin' ? 'Yönetici' : 'Aramacı'})">
             <div class="user-avatar">${currentUser.full_name.charAt(0).toUpperCase()}</div>
             <div class="user-info">
               <div class="user-name">${currentUser.full_name}</div>
@@ -117,6 +124,18 @@ function renderAppShell(contentRenderer: (container: HTMLElement) => void, activ
       </main>
     </div>
   `;
+
+  // Kenar çubuğu daralt/genişlet butonu
+  const sidebarEl = document.getElementById('app-sidebar');
+  const toggleBtn = document.getElementById('btn-sidebar-toggle');
+  toggleBtn?.addEventListener('click', () => {
+    const collapsed = sidebarEl?.classList.toggle('collapsed');
+    localStorage.setItem('cc_sidebar_collapsed', collapsed ? 'true' : 'false');
+    if (toggleBtn) {
+      toggleBtn.innerHTML = (collapsed ? icons.chevronRight(18) : icons.chevronLeft(18)) as any;
+      toggleBtn.title = collapsed ? 'Menüyü Genişlet' : 'Menüyü Daralt';
+    }
+  });
 
   // Çıkış yap butonu
   document.getElementById('btn-logout')?.addEventListener('click', async () => {

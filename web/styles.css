@@ -264,27 +264,57 @@ html, body {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 20;
 }
 .sidebar-header {
-  padding: 1.25rem;
+  padding: 1rem 0.85rem 1rem 1.15rem;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: space-between;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  min-height: 56px;
+}
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
 }
 .sidebar-logo {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: -0.01em;
+  color: #ffffff;
+  white-space: nowrap;
+}
+.btn-sidebar-toggle {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 0.35rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.btn-sidebar-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
   color: #ffffff;
 }
 .sidebar-nav {
   flex: 1;
-  padding: 1rem 0.75rem;
+  padding: 0.85rem 0.6rem;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 .nav-item {
   display: flex;
@@ -297,6 +327,7 @@ html, body {
   font-size: 0.875rem;
   font-weight: 500;
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 .nav-item:hover {
   background-color: rgba(255, 255, 255, 0.06);
@@ -306,8 +337,42 @@ html, body {
   background-color: var(--secondary);
   color: #ffffff;
 }
+.nav-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Daraltılmış (Collapsed) Kenar Çubuğu */
+.app-sidebar.collapsed {
+  width: 64px;
+}
+.app-sidebar.collapsed .sidebar-header {
+  padding: 0.75rem 0.25rem;
+  justify-content: center;
+}
+.app-sidebar.collapsed .sidebar-brand {
+  display: none;
+}
+.app-sidebar.collapsed .nav-text {
+  display: none;
+}
+.app-sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 0.65rem 0;
+  gap: 0;
+}
+.app-sidebar.collapsed .user-info {
+  display: none;
+}
+.app-sidebar.collapsed .sidebar-footer {
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.75rem 0.25rem;
+  justify-content: center;
+}
 .sidebar-footer {
-  padding: 1rem;
+  padding: 0.85rem 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
