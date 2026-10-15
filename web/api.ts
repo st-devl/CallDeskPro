@@ -46,6 +46,9 @@ export async function apiRequest<T = any>(
   }
 
   if (!response.ok) {
+    if (response.status === 403 && data && data.code === 'PASSWORD_CHANGE_REQUIRED') {
+      window.location.hash = '#/giris';
+    }
     const errorMsg = (data && data.error) || response.statusText || 'Bir hata oluştu';
     throw new ApiError(response.status, errorMsg, data);
   }

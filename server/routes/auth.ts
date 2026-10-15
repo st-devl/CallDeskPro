@@ -13,6 +13,7 @@ import {
   type User
 } from '../auth.js';
 import { nowUtcIso } from '../time.js';
+import { requireUser } from '../guards.js';
 
 export const authRoutes: FastifyPluginAsync = async (fastify) => {
   const db = getDatabase();
@@ -99,13 +100,8 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // Mevcut oturum bilgisi
-  fastify.get('/me', async (request: FastifyRequest, reply: FastifyReply) => {
-    const rawToken = request.cookies.session_id;
-    const user = validateSession(db, rawToken);
-
-    if (!user) {
-      return reply.status(401).send({ error: 'Oturum bulunamadı veya süresi doldu' });
-    }
+  fastify.get('/me', { preHandler: requireUser }, async (request: FastifyRequest, reply: FastifyReply) => {
+    const user = (request as any).user;
 
     return reply.send({
       user: {
@@ -119,13 +115,8 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // Şifre değiştirme (İlk giriş veya kullanıcının kendi isteğiyle)
-  fastify.post('/change-password', async (request: FastifyRequest, reply: FastifyReply) => {
-    const rawToken = request.cookies.session_id;
-    const user = validateSession(db, rawToken);
-
-    if (!user) {
-      return reply.status(401).send({ error: 'Oturum açmanız gerekiyor' });
-    }
+  fastify.post('/change-password', { preHandler: requireUser }, async (request: FastifyRequest, reply: FastifyReply) => {
+    const user = (request as any).user;
 
     const { current_password, new_password } = (request.body as any) || {};
 

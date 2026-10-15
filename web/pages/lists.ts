@@ -274,34 +274,36 @@ export function renderListsPage(container: HTMLElement, currentUser: any) {
         { key: 'contact_person', label: 'Görüşülen / İlgili Kişi', required: false }
       ];
 
-      mappingContainer.innerHTML = fields.map(f => `
-        <div class="form-group" style="margin-bottom: 0.5rem;">
-          <label class="form-label" style="font-size: 0.75rem;">${f.label}</label>
-          <select class="form-control mapping-select" data-field="${f.key}" style="font-size: 0.8125rem;">
-            <option value="">-- Eşleştirilmedi --</option>
-            ${headers.map((h, idx) => `
-              <option value="${idx}" ${suggested[f.key] === idx ? 'selected' : ''}>
-                ${idx + 1}. ${h || `(Sütun ${idx + 1})`}
-              </option>
-            `).join('')}
-          </select>
-        </div>
-      `).join('');
+      mappingContainer.innerHTML = html`
+        ${fields.map(f => html`
+          <div class="form-group" style="margin-bottom: 0.5rem;">
+            <label class="form-label" style="font-size: 0.75rem;">${f.label}</label>
+            <select class="form-control mapping-select" data-field="${f.key}" style="font-size: 0.8125rem;">
+              <option value="">-- Eşleştirilmedi --</option>
+              ${headers.map((h, idx) => html`
+                <option value="${idx}" ${suggested[f.key] === idx ? raw('selected') : ''}>
+                  ${idx + 1}. ${h || `(Sütun ${idx + 1})`}
+                </option>
+              `)}
+            </select>
+          </div>
+        `)}
+      `;
 
       // Tablo Önizlemesi
       const table = modalBackdrop.querySelector('#preview-table') as HTMLElement;
-      table.innerHTML = `
+      table.innerHTML = html`
         <thead>
           <tr>
-            ${headers.map((h, i) => `<th>${i + 1}. ${h}</th>`).join('')}
+            ${headers.map((h, i) => html`<th>${i + 1}. ${h}</th>`)}
           </tr>
         </thead>
         <tbody>
-          ${(data.previewRows as string[][]).map(row => `
+          ${(data.previewRows as string[][]).map(row => html`
             <tr>
-              ${row.map(cell => `<td>${cell || '-'}</td>`).join('')}
+              ${row.map(cell => html`<td>${cell || '-'}</td>`)}
             </tr>
-          `).join('')}
+          `)}
         </tbody>
       `;
     }

@@ -5,19 +5,13 @@ import { validateSession, type User } from '../auth.js';
 import { escapeHtml, escapeHtmlWithLineBreaks, normalizeSearchText } from '../text.js';
 import { todayIstanbul, formatDateTimeIstanbul } from '../time.js';
 
+import { requireUser } from '../guards.js';
+
 export const exportRoutes: FastifyPluginAsync = async (fastify) => {
   const db = getDatabase();
 
   // Oturum kontrolü
-  fastify.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply) => {
-    const rawToken = request.cookies.session_id;
-    const user = validateSession(db, rawToken);
-
-    if (!user) {
-      return reply.status(401).send({ error: 'Oturum açmanız gerekiyor' });
-    }
-    (request as any).user = user;
-  });
+  fastify.addHook('preHandler', requireUser);
 
   // HTML Rapor Dışa Aktar (Stream / Akış Tabanlı)
   fastify.get('/records', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -91,7 +85,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
     }
 
     if (query.due === '1' || query.due === 'true') {
-      conditions.push('o.status = "follow_up" AND o.follow_up_date <= ?');
+      conditions.push("o.status = 'follow_up' AND o.follow_up_date <= ?");
       params.push(todayIstanbul());
       activeFiltersList.push('Filtre: Bugün ve Geciken');
     }

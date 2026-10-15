@@ -10,24 +10,13 @@ import {
 } from '../auth.js';
 import { nowUtcIso } from '../time.js';
 
+import { requireAdmin } from '../guards.js';
+
 export const adminRoutes: FastifyPluginAsync = async (fastify) => {
   const db = getDatabase();
 
-  // Yönetici Yetki Kontrolü Ön Kancası (Hook)
-  fastify.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply) => {
-    const rawToken = request.cookies.session_id;
-    const user = validateSession(db, rawToken);
-
-    if (!user) {
-      return reply.status(401).send({ error: 'Oturum açmanız gerekiyor' });
-    }
-
-    if (user.role !== 'admin') {
-      return reply.status(403).send({ error: 'Bu işlem için yönetici yetkisi gereklidir' });
-    }
-
-    (request as any).user = user;
-  });
+  // Yönetici Yetki Kontrolü Ön Kancası
+  fastify.addHook('preHandler', requireAdmin);
 
   // Kullanıcı listesi
   fastify.get('/users', async () => {

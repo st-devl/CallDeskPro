@@ -70,22 +70,13 @@ function autoMapColumns(headers: string[]): Record<string, number> {
   return mapping;
 }
 
+import { requireAdmin } from '../guards.js';
+
 export const importRoutes: FastifyPluginAsync = async (fastify) => {
   const db = getDatabase();
 
   // Yalnızca admin erişebilir
-  fastify.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply) => {
-    const rawToken = request.cookies.session_id;
-    const user = validateSession(db, rawToken);
-
-    if (!user) {
-      return reply.status(401).send({ error: 'Oturum açmanız gerekiyor' });
-    }
-    if (user.role !== 'admin') {
-      return reply.status(403).send({ error: 'Bu işlem için yönetici yetkisi gereklidir' });
-    }
-    (request as any).user = user;
-  });
+  fastify.addHook('preHandler', requireAdmin);
 
   // Ham dosya yükleme ve önizleme (10 MB gövde sınırı)
   fastify.post('/upload', {

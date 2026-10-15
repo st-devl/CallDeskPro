@@ -9,19 +9,13 @@ import {
 } from '../text.js';
 import { todayIstanbul, nowUtcIso } from '../time.js';
 
+import { requireUser, requireAdmin } from '../guards.js';
+
 export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
   const db = getDatabase();
 
   // Oturum Doğrulama Ön Kancası
-  fastify.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply) => {
-    const rawToken = request.cookies.session_id;
-    const user = validateSession(db, rawToken);
-
-    if (!user) {
-      return reply.status(401).send({ error: 'Oturum açmanız gerekiyor' });
-    }
-    (request as any).user = user;
-  });
+  fastify.addHook('preHandler', requireUser);
 
   // İstatistik Kartları
   fastify.get('/stats', async (request: FastifyRequest) => {
@@ -70,8 +64,8 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get('/filters', async (request: FastifyRequest) => {
     const user = (request as any).user as User;
 
-    let countryQuery = 'SELECT DISTINCT country FROM organizations WHERE country IS NOT NULL AND country != ""';
-    let cityQuery = 'SELECT DISTINCT city FROM organizations WHERE city IS NOT NULL AND city != ""';
+    let countryQuery = "SELECT DISTINCT country FROM organizations WHERE country IS NOT NULL AND country != ''";
+    let cityQuery = "SELECT DISTINCT city FROM organizations WHERE city IS NOT NULL AND city != ''";
     const filterParams: any[] = [];
 
     if (user.role === 'agent') {
@@ -235,7 +229,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
 
     // Bugün ve Geciken (follow_up)
     if (query.due === '1' || query.due === 'true') {
-      conditions.push('o.status = "follow_up" AND o.follow_up_date <= ?');
+      conditions.push("o.status = 'follow_up' AND o.follow_up_date <= ?");
       params.push(todayIstanbul());
     }
 
@@ -455,12 +449,8 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
   // --- YÖNETİCİ ÖZEL UÇ NOKTALARI ---
 
   // Manuel Yeni Kayıt Ekle (Yalnızca Yönetici)
-  fastify.post('/', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/', { preHandler: requireAdmin }, async (request: FastifyRequest, reply: FastifyReply) => {
     const user = (request as any).user as User;
-    if (user.role !== 'admin') {
-      return reply.status(403).send({ error: 'Yalnızca yöneticiler yeni kayıt ekleyebilir' });
-    }
-
     const { organization_name, country, city, whatsapp, phone, website, contact_person, assigned_to } = (request.body as any) || {};
 
     if (!organization_name || !String(organization_name).trim()) {
@@ -534,12 +524,8 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // Kayıtları Atama / Devretme / Havuza Bırakma (Yalnızca Yönetici)
-  fastify.post('/assign', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/assign', { preHandler: requireAdmin }, async (request: FastifyRequest, reply: FastifyReply) => {
     const user = (request as any).user as User;
-    if (user.role !== 'admin') {
-      return reply.status(403).send({ error: 'Yalnızca yöneticiler atama yapabilir' });
-    }
-
     const { ids, target_user_id } = (request.body as any) || {};
 
     if (!Array.isArray(ids) || ids.length === 0) {
@@ -569,12 +555,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // Tekil Kayıt Sil (Yalnızca Yönetici)
-  fastify.delete('/:id', async (request: FastifyRequest, reply: FastifyReply) => {
-    const user = (request as any).user as User;
-    if (user.role !== 'admin') {
-      return reply.status(403).send({ error: 'Yalnızca yöneticiler kayıt silebilir' });
-    }
-
+  fastify.delete('/:id', { preHandler: requireAdmin }, async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
     const res = db.prepare('DELETE FROM organizations WHERE id = ?').run(id);
 
@@ -586,12 +567,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // Toplu Kayıt Sil (Yalnızca Yönetici)
-  fastify.post('/bulk-delete', async (request: FastifyRequest, reply: FastifyReply) => {
-    const user = (request as any).user as User;
-    if (user.role !== 'admin') {
-      return reply.status(403).send({ error: 'Yalnızca yöneticiler toplu silme yapabilir' });
-    }
-
+  fastify.post('/bulk-delete', { preHandler: requireAdmin }, async (request: FastifyRequest, reply: FastifyReply) => {
     const { ids } = (request.body as any) || {};
     if (!Array.isArray(ids) || ids.length === 0) {
       return reply.status(400).send({ error: 'Silinecek kayıtlar seçilmelidir' });
@@ -608,11 +584,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // Görüşme Kayıtları Raporu (Yalnızca Yönetici)
-  fastify.get('/calls-report', async (request: FastifyRequest, reply: FastifyReply) => {
-    const user = (request as any).user as User;
-    if (user.role !== 'admin') {
-      return reply.status(403).send({ error: 'Yalnızca yöneticiler görüşme geçmişini görebilir' });
-    }
+  fastify.get('/calls-report', { preHandler: requireAdmin }, async (request: FastifyRequest, reply: FastifyReply) => {
 
     const query = (request.query as any) || {};
     const page = Math.max(1, parseInt(query.page || '1', 10));
@@ -686,11 +658,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // Özet Personel Performansı (Yalnızca Yönetici)
-  fastify.get('/performance-summary', async (request: FastifyRequest, reply: FastifyReply) => {
-    const user = (request as any).user as User;
-    if (user.role !== 'admin') {
-      return reply.status(403).send({ error: 'Yalnızca yöneticiler performans özetini görebilir' });
-    }
+  fastify.get('/performance-summary', { preHandler: requireAdmin }, async (request: FastifyRequest, reply: FastifyReply) => {
 
     const query = (request.query as any) || {};
     const startDate = query.start_date || todayIstanbul();

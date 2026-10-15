@@ -1,4 +1,4 @@
-import { html, raw } from '../html.js';
+import { html, raw, escapeHtml } from '../html.js';
 import { api } from '../api.js';
 import { icons } from '../icons.js';
 import { showToast } from '../ui.js';
@@ -86,7 +86,7 @@ function renderStaffBars(staffList: any[]): string {
         return `
           <div class="perf-bar-row">
             <div class="perf-bar-labels">
-              <span><strong>${s.full_name}</strong></span>
+              <span><strong>${escapeHtml(s.full_name)}</strong></span>
               <span style="color: var(--text-muted); font-size: 0.75rem;">
                 <strong>${total}</strong> görüşme | <span style="color: #10b981; font-weight: 600;">%${rate} Başarı</span>
               </span>

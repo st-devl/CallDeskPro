@@ -63,6 +63,18 @@ await fastify.register(cookie, {
   secret: undefined // HMAC imzası yerine DB hash kullanılıyor
 });
 
+// Merkezi Hata İşleyicisi (5xx hatalarında SQLite/iç detayları gizler, loglar)
+fastify.setErrorHandler((error: any, request, reply) => {
+  const statusCode = error.statusCode || 500;
+  if (statusCode >= 500) {
+    console.error(`[500 Hata] ${request.method} ${request.url}:`, error.stack || error);
+    return reply.status(500).send({ error: 'Sunucu hatası oluştu' });
+  }
+  return reply.status(statusCode).send({
+    error: error.message || 'Bir hata oluştu'
+  });
+});
+
 // Güvenlik Başlıkları ve CSRF Kontrolü
 fastify.addHook('onRequest', async (request, reply) => {
   // Güvenlik başlıkları
