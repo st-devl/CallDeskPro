@@ -107,8 +107,9 @@ function renderStaffBars(staffList: any[]): string {
 
 export function renderSummaryPage(container: HTMLElement, currentUser: any) {
   let summaryData: any[] = [];
-  let startDate = new Date().toISOString().split('T')[0];
-  let endDate = new Date().toISOString().split('T')[0];
+  const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul' }).format(new Date());
+  let startDate = todayStr;
+  let endDate = todayStr;
   let isLoading = false;
 
   async function loadData() {

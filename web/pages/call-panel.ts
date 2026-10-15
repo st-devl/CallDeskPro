@@ -100,7 +100,7 @@ export function openCallPanel(options: CallPanelOptions) {
         // Yarının tarihini varsayılan yap
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
-        input.value = tomorrow.toISOString().split('T')[0];
+        input.value = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul' }).format(tomorrow);
       }
     }
   }

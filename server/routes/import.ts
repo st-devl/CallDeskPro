@@ -256,11 +256,13 @@ export const importRoutes: FastifyPluginAsync = async (fastify) => {
         INSERT INTO organizations (
           list_id, organization_name, country, city, whatsapp, phone, website, contact_person,
           assigned_to, assigned_at, status, note, last_contact_date, last_contact_by,
-          follow_up_date, created_at, updated_at, search_text, name_sort, whatsapp_normalized
+          follow_up_date, created_at, updated_at, search_text, name_sort, whatsapp_normalized,
+          name_key
         ) VALUES (
           ?, ?, ?, ?, ?, ?, ?, ?,
           NULL, NULL, NULL, NULL, NULL, NULL,
-          NULL, ?, ?, ?, ?, ?
+          NULL, ?, ?, ?, ?, ?,
+          ?
         )
       `);
 
@@ -269,7 +271,7 @@ export const importRoutes: FastifyPluginAsync = async (fastify) => {
       `);
 
       const checkNameCountryStmt = db.prepare(`
-        SELECT id FROM organizations WHERE search_text = ? AND (country = ? OR country IS NULL)
+        SELECT id FROM organizations WHERE name_key = ? AND country IS ?
       `);
 
       for (let i = 0; i < allRows.length; i++) {
@@ -303,6 +305,7 @@ export const importRoutes: FastifyPluginAsync = async (fastify) => {
 
         // WhatsApp normalizasyonu
         const whatsappNormalized = normalizePhoneDigits(rawWhatsapp || rawPhone);
+        const nameKey = normalizeSearchText(rawOrgName);
 
         // Tekrar kontrolü (Tekrar tespit edilirse atlanır)
         if (whatsappNormalized) {
@@ -318,12 +321,12 @@ export const importRoutes: FastifyPluginAsync = async (fastify) => {
           seenPhonesInBatch.add(whatsappNormalized);
         } else {
           // Telefon yoksa normalize ad + ülke kontrolü
-          const nameCountryKey = `${normalizeSearchText(rawOrgName)}|${country || ''}`;
+          const nameCountryKey = `${nameKey}|${country || ''}`;
           if (seenNamesInBatch.has(nameCountryKey)) {
             duplicateCount++;
             continue;
           }
-          const existingName = checkNameCountryStmt.get(normalizeSearchText(rawOrgName), country);
+          const existingName = checkNameCountryStmt.get(nameKey, country);
           if (existingName) {
             duplicateCount++;
             continue;
@@ -348,7 +351,8 @@ export const importRoutes: FastifyPluginAsync = async (fastify) => {
           createdAt,
           searchText,
           nameSort,
-          whatsappNormalized
+          whatsappNormalized,
+          nameKey
         );
         addedCount++;
       }

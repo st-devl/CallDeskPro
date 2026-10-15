@@ -7,7 +7,7 @@ import {
   normalizePhoneDigits,
   isValidInternationalPhone
 } from '../text.js';
-import { todayIstanbul, nowUtcIso } from '../time.js';
+import { todayIstanbul, nowUtcIso, istanbulDayRangeUtc } from '../time.js';
 
 import { requireUser, requireAdmin } from '../guards.js';
 
@@ -356,34 +356,68 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
       });
     }
 
+    // Durum (status) doğrulaması
+    if (status !== undefined && status !== null && status !== '') {
+      if (!['positive', 'negative', 'follow_up'].includes(status)) {
+        return reply.status(400).send({ error: 'Geçersiz görüşme sonucu' });
+      }
+    }
+
+    // Takip tarihi biçim doğrulaması
+    if (follow_up_date) {
+      if (typeof follow_up_date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(follow_up_date)) {
+        return reply.status(400).send({ error: 'Takip tarihi YYYY-MM-DD biçiminde olmalıdır' });
+      }
+    }
+
     // Kuruluş adını yalnızca yönetici değiştirebilir
     const finalOrgName = (user.role === 'admin' && organization_name)
       ? String(organization_name).trim()
       : currentRecord.organization_name;
 
-    const finalCountry = country != null ? String(country).trim() : currentRecord.country;
-    const finalCity = city != null ? String(city).trim() : currentRecord.city;
-    const finalWhatsapp = whatsapp != null ? String(whatsapp).trim() : currentRecord.whatsapp;
-    const finalPhone = phone != null ? String(phone).trim() : currentRecord.phone;
-    const finalWebsite = website != null ? String(website).trim() : currentRecord.website;
-    const finalContact = contact_person != null ? String(contact_person).trim() : currentRecord.contact_person;
+    const finalCountry = country !== undefined ? (country ? String(country).trim() : null) : currentRecord.country;
+    const finalCity = city !== undefined ? (city ? String(city).trim() : null) : currentRecord.city;
+    const finalWhatsapp = whatsapp !== undefined ? (whatsapp ? String(whatsapp).trim() : null) : currentRecord.whatsapp;
+    const finalPhone = phone !== undefined ? (phone ? String(phone).trim() : null) : currentRecord.phone;
+    // Web sitesi: İstekte website: null ya da boş metin gelirse web sitesi silinsin
+    const finalWebsite = website !== undefined ? (website && String(website).trim() ? String(website).trim() : null) : currentRecord.website;
+    const finalContact = contact_person !== undefined ? (contact_person ? String(contact_person).trim() : null) : currentRecord.contact_person;
+
+    // Not: İstekte note alanı varsa (boş metin dahil) o değer yazılsın; alan hiç gönderilmemişse mevcut not korunsun
+    const finalNote = note !== undefined ? (note ? String(note).trim() : '') : currentRecord.note;
 
     // Durum ve takip tarihi kontrolü
-    const finalStatus = status || currentRecord.status;
-    let finalFollowUp = follow_up_date || null;
-    if (finalStatus === 'follow_up' && !finalFollowUp) {
-      return reply.status(400).send({ error: 'Tekrar Görüşülecek sonucu için takip tarihi seçilmelidir' });
+    const hasNewStatus = Boolean(status && ['positive', 'negative', 'follow_up'].includes(status));
+    const finalStatus = hasNewStatus ? status : currentRecord.status;
+    let finalFollowUp = follow_up_date !== undefined ? follow_up_date : currentRecord.follow_up_date;
+
+    if (finalStatus === 'follow_up' && (!finalFollowUp || !/^\d{4}-\d{2}-\d{2}$/.test(finalFollowUp))) {
+      return reply.status(400).send({ error: 'Tekrar Görüşülecek sonucu için geçerli bir takip tarihi seçilmelidir' });
     }
     if (finalStatus !== 'follow_up') {
       finalFollowUp = null;
     }
 
+    // last_contact alanları: yalnızca istekte geçerli bir status geldiğinde güncellensin
     const today = todayIstanbul();
+    const finalLastContactDate = hasNewStatus ? today : currentRecord.last_contact_date;
+    const finalLastContactBy = hasNewStatus ? user.id : currentRecord.last_contact_by;
+
     const nowIso = nowUtcIso();
 
     const whatsappNormalized = normalizePhoneDigits(finalWhatsapp || finalPhone);
+
+    // Mükerrer numara kontrolü: Başka bir kayıtta zaten bulunan bir numara girilirse 409 dön
+    if (whatsappNormalized) {
+      const existingPhone = db.prepare('SELECT id FROM organizations WHERE whatsapp_normalized = ? AND id != ?').get(whatsappNormalized, id);
+      if (existingPhone) {
+        return reply.status(409).send({ error: 'Bu numara başka bir kayıtta mevcut' });
+      }
+    }
+
     const searchText = normalizeSearchText(`${finalOrgName} ${finalContact || ''} ${finalCity || ''} ${finalCountry || ''}`);
     const nameSort = createSortKey(finalOrgName);
+    const finalNameKey = normalizeSearchText(finalOrgName);
 
     // Tek transaction içinde organizations güncellemesi ve calls eklemesi
     const saveTx = db.transaction(() => {
@@ -406,7 +440,8 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
           updated_at = ?,
           search_text = ?,
           name_sort = ?,
-          whatsapp_normalized = ?
+          whatsapp_normalized = ?,
+          name_key = ?
         WHERE id = ?
       `).run(
         finalOrgName,
@@ -417,23 +452,24 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
         finalWebsite,
         finalContact,
         finalStatus,
-        note || currentRecord.note,
-        today,
-        user.id,
+        finalNote,
+        finalLastContactDate,
+        finalLastContactBy,
         finalFollowUp,
         nowIso,
         searchText,
         nameSort,
         whatsappNormalized,
+        finalNameKey,
         id
       );
 
-      // 2. Yeni görüşme kaydı ekle (eğer durum seçilmişse veya yeni bir not girilmişse)
-      if (status) {
+      // 2. Yeni görüşme kaydı ekle (eğer durum seçilmişse)
+      if (hasNewStatus) {
         db.prepare(`
           INSERT INTO calls (organization_id, user_id, status, note, follow_up_date, created_at)
           VALUES (?, ?, ?, ?, ?, ?)
-        `).run(id, user.id, finalStatus, note || '', finalFollowUp, nowIso);
+        `).run(id, user.id, finalStatus, finalNote || '', finalFollowUp, nowIso);
       }
     });
 
@@ -475,6 +511,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
     const whatsappNormalized = normalizePhoneDigits(cleanWhatsapp || cleanPhone);
     const searchText = normalizeSearchText(`${cleanOrgName} ${cleanContact || ''} ${cleanCity || ''} ${cleanCountry || ''}`);
     const nameSort = createSortKey(cleanOrgName);
+    const nameKey = normalizeSearchText(cleanOrgName);
     const nowIso = nowUtcIso();
 
     // Tekrar kontrolü
@@ -482,6 +519,11 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
       const exists = db.prepare('SELECT id FROM organizations WHERE whatsapp_normalized = ?').get(whatsappNormalized);
       if (exists) {
         return reply.status(400).send({ error: 'Bu telefon/WhatsApp numarasına sahip bir kayıt zaten mevcut' });
+      }
+    } else {
+      const existsName = db.prepare('SELECT id FROM organizations WHERE name_key = ? AND country IS ?').get(nameKey, cleanCountry);
+      if (existsName) {
+        return reply.status(400).send({ error: 'Bu ada ve ülkeye sahip bir kayıt zaten mevcut' });
       }
     }
 
@@ -492,11 +534,13 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
       INSERT INTO organizations (
         list_id, organization_name, country, city, whatsapp, phone, website, contact_person,
         assigned_to, assigned_at, status, note, last_contact_date, last_contact_by,
-        follow_up_date, created_at, updated_at, search_text, name_sort, whatsapp_normalized
+        follow_up_date, created_at, updated_at, search_text, name_sort, whatsapp_normalized,
+        name_key
       ) VALUES (
         ?, ?, ?, ?, ?, ?, ?, ?,
         ?, ?, NULL, NULL, NULL, NULL,
-        NULL, ?, ?, ?, ?, ?
+        NULL, ?, ?, ?, ?, ?,
+        ?
       )
     `).run(
       manualList.id,
@@ -513,7 +557,8 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
       nowIso,
       searchText,
       nameSort,
-      whatsappNormalized
+      whatsappNormalized,
+      nameKey
     );
 
     return reply.status(201).send({
@@ -604,14 +649,28 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
       params.push(query.status);
     }
 
-    if (query.start_date) {
-      conditions.push('c.created_at >= ?');
-      params.push(`${query.start_date}T00:00:00.000Z`);
+    const startDate = query.start_date ? String(query.start_date).trim() : null;
+    const endDate = query.end_date ? String(query.end_date).trim() : null;
+
+    if (startDate && !/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
+      return reply.status(400).send({ error: 'Başlangıç tarihi YYYY-MM-DD formatında olmalıdır' });
+    }
+    if (endDate && !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+      return reply.status(400).send({ error: 'Bitiş tarihi YYYY-MM-DD formatında olmalıdır' });
     }
 
-    if (query.end_date) {
-      conditions.push('c.created_at <= ?');
-      params.push(`${query.end_date}T23:59:59.999Z`);
+    if (startDate && endDate) {
+      const [startUtc, endUtc] = istanbulDayRangeUtc(startDate, endDate);
+      conditions.push('c.created_at >= ? AND c.created_at < ?');
+      params.push(startUtc, endUtc);
+    } else if (startDate) {
+      const [startUtc] = istanbulDayRangeUtc(startDate, startDate);
+      conditions.push('c.created_at >= ?');
+      params.push(startUtc);
+    } else if (endDate) {
+      const [, endUtc] = istanbulDayRangeUtc(endDate, endDate);
+      conditions.push('c.created_at < ?');
+      params.push(endUtc);
     }
 
     if (query.list_id) {
@@ -661,8 +720,14 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get('/performance-summary', { preHandler: requireAdmin }, async (request: FastifyRequest, reply: FastifyReply) => {
 
     const query = (request.query as any) || {};
-    const startDate = query.start_date || todayIstanbul();
-    const endDate = query.end_date || todayIstanbul();
+    const startDate = String(query.start_date || todayIstanbul()).trim();
+    const endDate = String(query.end_date || todayIstanbul()).trim();
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+      return reply.status(400).send({ error: 'Tarih parametreleri YYYY-MM-DD biçiminde olmalıdır' });
+    }
+
+    const [startUtc, endUtc] = istanbulDayRangeUtc(startDate, endDate);
 
     // Tüm aktif/pasif aramacılar
     const agents = db.prepare(`
@@ -682,8 +747,8 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
           SUM(CASE WHEN status = 'follow_up' THEN 1 ELSE 0 END) as followup_count,
           MAX(created_at) as last_call_at
         FROM calls
-        WHERE user_id = ? AND date(created_at) >= ? AND date(created_at) <= ?
-      `).get(agent.id, startDate, endDate) as any;
+        WHERE user_id = ? AND created_at >= ? AND created_at < ?
+      `).get(agent.id, startUtc, endUtc) as any;
 
       // Üzerindeki görüşülmemiş kayıt sayısı
       const uncontacted = db.prepare(`

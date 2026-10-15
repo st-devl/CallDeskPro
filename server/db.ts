@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import { existsSync, mkdirSync } from 'fs';
 import { resolve, dirname } from 'path';
+import { normalizeSearchText } from './text.js';
 
 export interface AppDatabase {
   db: Database.Database;
@@ -79,7 +80,8 @@ export function initDatabase(dbPath: string): Database.Database {
         updated_at TEXT NOT NULL,
         search_text TEXT NOT NULL,
         name_sort TEXT NOT NULL,
-        whatsapp_normalized TEXT
+        whatsapp_normalized TEXT,
+        name_key TEXT
       );
 
       CREATE UNIQUE INDEX IF NOT EXISTS idx_org_whatsapp ON organizations(whatsapp_normalized)
@@ -91,6 +93,7 @@ export function initDatabase(dbPath: string): Database.Database {
       CREATE INDEX IF NOT EXISTS idx_org_city ON organizations(city);
       CREATE INDEX IF NOT EXISTS idx_org_follow_up ON organizations(follow_up_date);
       CREATE INDEX IF NOT EXISTS idx_org_pool ON organizations(assigned_to, list_id, id);
+      CREATE INDEX IF NOT EXISTS idx_org_name_country ON organizations(name_key, country);
 
       CREATE TABLE IF NOT EXISTS calls (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -112,11 +115,11 @@ export function initDatabase(dbPath: string): Database.Database {
 
       INSERT OR IGNORE INTO settings (key, value) VALUES ('uncontacted_limit', '1');
 
-      PRAGMA user_version = 2;
+      PRAGMA user_version = 3;
     `);
   }
 
-  // user_version kontrolü ve geriye dönük migration (website kolonu)
+  // user_version kontrolü ve geriye dönük migration (website ve name_key)
   const currentVersion = db.pragma('user_version', { simple: true }) as number;
   if (currentVersion < 2) {
     const tableInfo = db.prepare("PRAGMA table_info(organizations)").all() as Array<{ name: string }>;
@@ -125,6 +128,28 @@ export function initDatabase(dbPath: string): Database.Database {
       db.exec(`ALTER TABLE organizations ADD COLUMN website TEXT;`);
     }
     db.pragma('user_version = 2');
+  }
+
+  if (currentVersion < 3) {
+    const tableInfo = db.prepare("PRAGMA table_info(organizations)").all() as Array<{ name: string }>;
+    const hasNameKey = tableInfo.some((col) => col.name === 'name_key');
+    if (!hasNameKey) {
+      db.exec(`ALTER TABLE organizations ADD COLUMN name_key TEXT;`);
+    }
+
+    const rows = db.prepare('SELECT id, organization_name FROM organizations WHERE name_key IS NULL').all() as Array<{ id: number; organization_name: string }>;
+    if (rows.length > 0) {
+      const updateStmt = db.prepare('UPDATE organizations SET name_key = ? WHERE id = ?');
+      const updateMany = db.transaction((items: Array<{ id: number; organization_name: string }>) => {
+        for (const row of items) {
+          updateStmt.run(normalizeSearchText(row.organization_name), row.id);
+        }
+      });
+      updateMany(rows);
+    }
+
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_org_name_country ON organizations(name_key, country);`);
+    db.pragma('user_version = 3');
   }
 
   // Manuel kayıtlar için varsayılan liste oluştur

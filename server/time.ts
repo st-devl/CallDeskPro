@@ -58,3 +58,24 @@ export function formatDateDisplay(dateString: string | null | undefined): string
 export function nowUtcIso(): string {
   return new Date().toISOString();
 }
+
+/**
+ * Verilen YYYY-MM-DD başlangıç ve bitiş tarihlerini Europe/Istanbul gün sınırlarına göre
+ * [startUtcIso, endUtcIso) yarı açık UTC aralığına çevirir.
+ */
+export function istanbulDayRangeUtc(startDate: string, endDate: string): [string, string] {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+    throw new Error('Tarih formatı YYYY-MM-DD olmalıdır');
+  }
+
+  // Türkiye saat dilimi UTC+3 sabittir (+03:00)
+  const startUtc = new Date(`${startDate}T00:00:00.000+03:00`).toISOString();
+
+  // Bitiş gününün ertesi günü 00:00:00+03:00 (yarı açık aralık için)
+  const [endY, endM, endD] = endDate.split('-').map(Number);
+  const nextDay = new Date(Date.UTC(endY, endM - 1, endD + 1));
+  const nextDayStr = nextDay.toISOString().slice(0, 10);
+  const endUtc = new Date(`${nextDayStr}T00:00:00.000+03:00`).toISOString();
+
+  return [startUtc, endUtc];
+}
