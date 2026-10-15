@@ -33,7 +33,8 @@ export async function apiRequest<T = any>(
     credentials: 'same-origin'
   });
 
-  if (response.status === 401) {
+  // Giriş isteğindeki 401 "hatalı kullanıcı adı/şifre" demektir, oturum süresi dolması değil
+  if (response.status === 401 && path !== 'auth/login') {
     // Oturum süresi doldu veya geçersiz
     const currentHash = window.location.hash;
     if (currentHash && !currentHash.startsWith('#/giris')) {
