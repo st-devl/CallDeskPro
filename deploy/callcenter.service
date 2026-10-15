@@ -1,0 +1,30 @@
+[Unit]
+Description=CALL CENTER Takip ve Gorusme Sistemi
+After=network.target
+
+[Service]
+Type=simple
+User=callcenter
+Group=callcenter
+WorkingDirectory=/opt/callcenter/current
+EnvironmentFile=/opt/callcenter/.env
+Environment=NODE_ENV=production
+Environment=TZ=Europe/Istanbul
+ExecStart=/opt/callcenter/node/bin/node dist/server/index.js
+Restart=always
+RestartSec=5
+
+# Kaynak Sınırlamaları (PROJECT.md Bölüm 0.3)
+MemoryMax=512M
+CPUQuota=50%
+TasksMax=64
+
+# Güvenlik ve İzolasyon Kuralları (PROJECT.md Bölüm 0.3)
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/lib/callcenter /opt/callcenter
+
+[Install]
+WantedBy=multi-user.target

@@ -5,6 +5,7 @@ import { resolve, join } from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
 import { initDatabase, getDatabase } from './db.js';
 import { ensureInitialAdmin, cleanupExpiredSessions } from './auth.js';
+import { startBackupScheduler } from './backup.js';
 import { authRoutes } from './routes/auth.js';
 import { adminRoutes } from './routes/admin.js';
 import { importRoutes } from './routes/import.js';
@@ -47,6 +48,9 @@ await ensureInitialAdmin(
   process.env.INITIAL_ADMIN_USERNAME,
   process.env.INITIAL_ADMIN_PASSWORD
 );
+
+// Otomatik günlük yedekleme zamanlayıcısını başlat (Her gün 03:30 Europe/Istanbul)
+startBackupScheduler(db, DATA_DIR);
 
 const fastify = Fastify({
   logger: false, // Log miktarı düşük tutulur; journald'ye gider
