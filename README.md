@@ -98,11 +98,14 @@ Yeni sürüm yayınlandığında sunucudaki diğer hiçbir servisi etkilemeden t
 sudo ./deploy/update.sh callcenter-release-v1.1.0.tar.gz
 ```
 
+`update.sh`, geçişten önce servisi kısa süreliğine durdurur ve veritabanının tam kopyasını `/var/lib/callcenter/backups/pre-update-<tarih>/` klasörüne alır. Bu klasörler otomatik silinmez; birkaç güncelleme sonra eskilerini elle temizleyebilirsiniz.
+
 ### Eski Sürüme Geri Dönüş (Rollback)
 ```bash
 sudo ln -sfn /opt/callcenter/releases/<onceki-tarih> /opt/callcenter/current
 sudo systemctl restart callcenter
 ```
+Veriyi de güncelleme öncesine döndürmeniz gerekirse `update.sh`'ın sonunda yazdırdığı geri alma komutlarını kullanın.
 
 ### Yedekleme ve Geri Yükleme
 - **Otomatik Yedek:** Uygulama her gece saat **03:30**'da (Türkiye saati) `/var/lib/callcenter/backups/callcenter-YYYY-MM-DD.db` yedeği alır ve son 14 yedeği saklar.
@@ -110,6 +113,8 @@ sudo systemctl restart callcenter
 - **Yedekten Geri Yükleme:**
   ```bash
   sudo systemctl stop callcenter
+  # Eski WAL dosyaları geri yüklenen veritabanına uygulanmasın diye silinir
+  sudo rm -f /var/lib/callcenter/callcenter.db-wal /var/lib/callcenter/callcenter.db-shm
   sudo cp /var/lib/callcenter/backups/callcenter-2026-10-15.db /var/lib/callcenter/callcenter.db
   sudo chown callcenter:callcenter /var/lib/callcenter/callcenter.db
   sudo systemctl start callcenter

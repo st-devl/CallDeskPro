@@ -47,7 +47,29 @@ sudo chmod 750 /opt/callcenter /var/lib/callcenter
 
 ---
 
-## 3. Uygulama Paketinin Açılması ve İzinler
+## 3. İzole Node.js 22 Kopyasının Kurulması
+
+Uygulama, sistemdeki Node.js'e dokunmadan kendi Node.js 22 kopyasıyla çalışır (servis dosyası `/opt/callcenter/node/bin/node` yolunu kullanır). Yayın paketi Linux x64 için Node.js 22 ile derlendiğinden sunucu **x86_64** olmalı ve Node sürümü **22** olmalıdır.
+
+```bash
+uname -m   # x86_64 olmalı
+cd /tmp
+NODE_TAR=$(curl -fsSL https://nodejs.org/dist/latest-v22.x/SHASUMS256.txt | grep -o 'node-v22[^ ]*-linux-x64.tar.xz')
+curl -fsSLO https://nodejs.org/dist/latest-v22.x/$NODE_TAR
+curl -fsSL https://nodejs.org/dist/latest-v22.x/SHASUMS256.txt | grep " $NODE_TAR\$" | sha256sum -c -
+sudo mkdir -p /opt/callcenter/node
+sudo tar -xJf $NODE_TAR -C /opt/callcenter/node --strip-components=1
+/opt/callcenter/node/bin/node -v   # v22.x.x yazmalı
+rm -f /tmp/$NODE_TAR
+```
+
+- **Ne değiştirir?** Yalnızca `/opt/callcenter/node` klasörünü oluşturur. Sistemdeki Node.js (varsa) değişmez; `PATH`'e eklenmez.
+- **Doğrulama:** `sha256sum -c` satırı `OK` yazmalıdır; yazmazsa devam etmeyin.
+- **Geri alma:** `sudo rm -rf /opt/callcenter/node`
+
+---
+
+## 4. Uygulama Paketinin Açılması ve İzinler
 
 GitHub Actions'tan veya yerel derlemeden üretilen `callcenter-release.tar.gz` paketini sunucuya kopyalayın:
 
@@ -64,7 +86,7 @@ sudo chown -R callcenter:callcenter /opt/callcenter
 
 ---
 
-## 4. Yapılandırma Dosyası (.env)
+## 5. Yapılandırma Dosyası (.env)
 
 ```bash
 sudo cp /opt/callcenter/current/.env.example /opt/callcenter/.env
@@ -88,7 +110,7 @@ SESSION_DAYS=7
 
 ---
 
-## 5. Systemd Servis Dosyası
+## 6. Systemd Servis Dosyası
 
 ```bash
 sudo cp /opt/callcenter/current/deploy/callcenter.service /etc/systemd/system/callcenter.service
@@ -109,7 +131,7 @@ sudo systemctl start callcenter
 
 ---
 
-## 6. Nginx Yapılandırması (Mevcut Dosyalara Dokunmadan)
+## 7. Nginx Yapılandırması (Mevcut Dosyalara Dokunmadan)
 
 > **DİKKAT:** Mevcut siteleri bozmamak için önce `nginx -t` ile sunucunun sağlamlığı doğrulanır!
 
@@ -135,7 +157,11 @@ sudo systemctl start callcenter
 5. **Certbot ile Yalnızca Bu Alt Alan Adı İçin SSL Alın:**
    ```bash
    sudo certbot --nginx -d arama.alanadiniz.com
+   sudo nginx -t
    ```
+   - Ön koşul: Alan adının DNS `A` kaydı bu sunucuyu göstermeli ve 80 portu dışarıdan erişilebilir olmalıdır.
+   - Yayındaki dosya bilinçli olarak yalnızca HTTP (80) ile başlar; böylece sertifika henüz yokken 3. adımdaki `nginx -t` hata vermez. Certbot sertifikayı alır, `callcenter.conf` dosyasına 443/SSL ayarlarını kendisi ekler, HTTP'yi HTTPS'e yönlendirir ve yenilemeyi otomatik kurar.
+   - Giriş çerezi yalnızca HTTPS üzerinden gönderildiği için sisteme giriş bu adımdan **sonra** çalışır.
 
 - **Geri alma:**
   ```bash
@@ -145,7 +171,7 @@ sudo systemctl start callcenter
 
 ---
 
-## 7. İlk Giriş ve Güvenlik Adımı
+## 8. İlk Giriş ve Güvenlik Adımı
 
 1. Tarayıcınızdan `https://arama.alanadiniz.com` adresini açın.
 2. `admin` ve belirlediğiniz `INITIAL_ADMIN_PASSWORD` ile giriş yapın.

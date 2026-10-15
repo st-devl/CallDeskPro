@@ -23,6 +23,7 @@ else
     echo "    Dağıtım: Bilinmiyor ($(uname -s))"
 fi
 echo "    Çekirdek: $(uname -r)"
+echo "    Mimari: $(uname -m) (Yayın paketi yalnızca x86_64 için derlenir)"
 echo ""
 
 # 2. Kaynak Durumu (Disk ve RAM)
