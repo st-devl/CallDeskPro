@@ -10,6 +10,7 @@ import {
 import { todayIstanbul, nowUtcIso, istanbulDayRangeUtc } from '../time.js';
 
 import { requireUser, requireAdmin } from '../guards.js';
+import { buildOrgFilter } from '../filter.js';
 
 export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
   const db = getDatabase();
@@ -96,21 +97,28 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
 
     // 1. Görüşülmemiş kayıt limiti kontrolü
     const limitSetting = db.prepare("SELECT value FROM settings WHERE key = 'uncontacted_limit'").get() as { value: string } | undefined;
-    const uncontactedLimit = parseInt(limitSetting?.value || '1', 10);
+    const parsedLimit = parseInt(limitSetting?.value || '1', 10);
+    const uncontactedLimit = isNaN(parsedLimit) || parsedLimit < 1 ? 1 : parsedLimit;
 
-    const uncontacted = db.prepare(`
-      SELECT id, organization_name, country, city, whatsapp, phone, website, contact_person, status, note, updated_at
+    const uncontactedCount = (db.prepare(`
+      SELECT COUNT(*) as total
       FROM organizations
       WHERE assigned_to = ? AND status IS NULL
-      ORDER BY id ASC
-      LIMIT 1
-    `).get(user.id) as any;
+    `).get(user.id) as { total: number }).total;
 
-    if (uncontacted) {
+    if (uncontactedCount >= uncontactedLimit) {
+      const firstUncontacted = db.prepare(`
+        SELECT id, organization_name, country, city, whatsapp, phone, website, contact_person, status, note, updated_at
+        FROM organizations
+        WHERE assigned_to = ? AND status IS NULL
+        ORDER BY id ASC
+        LIMIT 1
+      `).get(user.id) as any;
+
       return reply.send({
         assigned: false,
         message: 'Üzerinizde henüz görüşülmemiş bir kayıt bulunmaktadır. Önce bu görüşmeyi tamamlayınız.',
-        record: uncontacted
+        record: firstUncontacted
       });
     }
 
@@ -175,65 +183,7 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
     const limit = Math.min(100, Math.max(10, parseInt(query.limit || '50', 10)));
     const offset = (page - 1) * limit;
 
-    const conditions: string[] = [];
-    const params: any[] = [];
-
-    // Yetki kuralı: Aramacı DAİMA sadece kendi kayıtlarını görür!
-    if (user.role === 'agent') {
-      conditions.push('o.assigned_to = ?');
-      params.push(user.id);
-    } else {
-      // Yönetici filtreleri
-      if (query.agent_id) {
-        if (query.agent_id === 'pool') {
-          conditions.push('o.assigned_to IS NULL');
-        } else {
-          conditions.push('o.assigned_to = ?');
-          params.push(parseInt(query.agent_id, 10));
-        }
-      }
-      if (query.list_id) {
-        conditions.push('o.list_id = ?');
-        params.push(parseInt(query.list_id, 10));
-      }
-    }
-
-    // Arama filtresi (search_text)
-    if (query.search) {
-      const cleanSearch = normalizeSearchText(String(query.search));
-      if (cleanSearch) {
-        conditions.push('o.search_text LIKE ?');
-        params.push(`%${cleanSearch}%`);
-      }
-    }
-
-    // Ülke ve Şehir
-    if (query.country) {
-      conditions.push('o.country = ?');
-      params.push(String(query.country));
-    }
-    if (query.city) {
-      conditions.push('o.city = ?');
-      params.push(String(query.city));
-    }
-
-    // Durum
-    if (query.status) {
-      if (query.status === 'uncontacted') {
-        conditions.push('o.status IS NULL');
-      } else if (['positive', 'negative', 'follow_up'].includes(query.status)) {
-        conditions.push('o.status = ?');
-        params.push(query.status);
-      }
-    }
-
-    // Bugün ve Geciken (follow_up)
-    if (query.due === '1' || query.due === 'true') {
-      conditions.push("o.status = 'follow_up' AND o.follow_up_date <= ?");
-      params.push(todayIstanbul());
-    }
-
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const { whereClause, params } = buildOrgFilter(user, query);
 
     // Sıralama
     let orderBy = 'o.id DESC';

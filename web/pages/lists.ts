@@ -271,6 +271,7 @@ export function renderListsPage(container: HTMLElement, currentUser: any) {
         { key: 'city', label: 'Şehir', required: false },
         { key: 'whatsapp', label: 'WhatsApp Numarası', required: false },
         { key: 'phone', label: 'Telefon Numarası', required: false },
+        { key: 'website', label: 'Web Sitesi', required: false },
         { key: 'contact_person', label: 'Görüşülen / İlgili Kişi', required: false }
       ];
 

@@ -1,11 +1,21 @@
 import type { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify';
 import { Readable } from 'node:stream';
 import { getDatabase } from '../db.js';
-import { validateSession, type User } from '../auth.js';
-import { escapeHtml, escapeHtmlWithLineBreaks, normalizeSearchText } from '../text.js';
+import { type User } from '../auth.js';
+import { escapeHtml, escapeHtmlWithLineBreaks } from '../text.js';
 import { todayIstanbul, formatDateTimeIstanbul } from '../time.js';
-
 import { requireUser } from '../guards.js';
+import { buildOrgFilter } from '../filter.js';
+
+function formatWebsiteUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+}
 
 export const exportRoutes: FastifyPluginAsync = async (fastify) => {
   const db = getDatabase();
@@ -18,79 +28,7 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
     const user = (request as any).user as User;
     const query = (request.query as any) || {};
 
-    const conditions: string[] = [];
-    const params: any[] = [];
-    const activeFiltersList: string[] = [];
-
-    // Yetki: Aramacı yalnızca kendi kayıtlarını dışa aktarabilir!
-    if (user.role === 'agent') {
-      conditions.push('o.assigned_to = ?');
-      params.push(user.id);
-      activeFiltersList.push(`Aramacı: ${user.full_name}`);
-    } else {
-      if (query.agent_id) {
-        if (query.agent_id === 'pool') {
-          conditions.push('o.assigned_to IS NULL');
-          activeFiltersList.push('Aramacı: Havuzda Bekleyenler');
-        } else {
-          conditions.push('o.assigned_to = ?');
-          params.push(parseInt(query.agent_id, 10));
-          const agentUser = db.prepare('SELECT full_name FROM users WHERE id = ?').get(query.agent_id) as any;
-          activeFiltersList.push(`Aramacı: ${agentUser?.full_name || query.agent_id}`);
-        }
-      }
-      if (query.list_id) {
-        conditions.push('o.list_id = ?');
-        params.push(parseInt(query.list_id, 10));
-        const listRow = db.prepare('SELECT name FROM lists WHERE id = ?').get(query.list_id) as any;
-        activeFiltersList.push(`Liste: ${listRow?.name || query.list_id}`);
-      }
-    }
-
-    if (query.search) {
-      const cleanSearch = normalizeSearchText(String(query.search));
-      if (cleanSearch) {
-        conditions.push('o.search_text LIKE ?');
-        params.push(`%${cleanSearch}%`);
-        activeFiltersList.push(`Arama: "${query.search}"`);
-      }
-    }
-
-    if (query.country) {
-      conditions.push('o.country = ?');
-      params.push(String(query.country));
-      activeFiltersList.push(`Ülke: ${query.country}`);
-    }
-
-    if (query.city) {
-      conditions.push('o.city = ?');
-      params.push(String(query.city));
-      activeFiltersList.push(`Şehir: ${query.city}`);
-    }
-
-    if (query.status) {
-      if (query.status === 'uncontacted') {
-        conditions.push('o.status IS NULL');
-        activeFiltersList.push('Sonuç: Görüşülmedi');
-      } else if (['positive', 'negative', 'follow_up'].includes(query.status)) {
-        conditions.push('o.status = ?');
-        params.push(query.status);
-        const statusMap: Record<string, string> = {
-          positive: 'Olumlu',
-          negative: 'Olumsuz',
-          follow_up: 'Tekrar Görüşülecek'
-        };
-        activeFiltersList.push(`Sonuç: ${statusMap[query.status]}`);
-      }
-    }
-
-    if (query.due === '1' || query.due === 'true') {
-      conditions.push("o.status = 'follow_up' AND o.follow_up_date <= ?");
-      params.push(todayIstanbul());
-      activeFiltersList.push('Filtre: Bugün ve Geciken');
-    }
-
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const { whereClause, params, labels: activeFiltersList } = buildOrgFilter(user, query);
 
     const countSql = `SELECT COUNT(*) as total FROM organizations o ${whereClause}`;
     const totalCount = (db.prepare(countSql).get(...params) as { total: number }).total;
@@ -119,13 +57,9 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
     reply.header('Content-Type', 'text/html; charset=utf-8');
     reply.header('Content-Disposition', `attachment; filename="${filename}"`);
 
-    // Stream ile HTML üretimi
-    const stream = new Readable({
-      read() {}
-    });
-
-    // HTML Başlığı ve CSS Stilleri
-    stream.push(`<!DOCTYPE html>
+    // Geri basınç (backpressure) destekli gerçek akış üretimi (generator)
+    function* generateHtml() {
+      yield `<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="utf-8" />
@@ -183,25 +117,29 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
         <th style="width: 20%;">Not</th>
       </tr>
     </thead>
-    <tbody>
-`);
+    <tbody>\n`;
 
-    let rowIdx = 1;
-    for (const row of iterator as any) {
-      const statusLabel =
-        row.status === 'positive'
-          ? '<span class="badge badge-positive">Olumlu</span>'
-          : row.status === 'negative'
-          ? '<span class="badge badge-negative">Olumsuz</span>'
-          : row.status === 'follow_up'
-          ? '<span class="badge badge-followup">Tekrar Görüşülecek</span>'
-          : '<span class="badge badge-neutral">Görüşülmedi</span>';
+      let rowIdx = 1;
+      for (const row of iterator as any) {
+        const statusLabel =
+          row.status === 'positive'
+            ? '<span class="badge badge-positive">Olumlu</span>'
+            : row.status === 'negative'
+            ? '<span class="badge badge-negative">Olumsuz</span>'
+            : row.status === 'follow_up'
+            ? '<span class="badge badge-followup">Tekrar Görüşülecek</span>'
+            : '<span class="badge badge-neutral">Görüşülmedi</span>';
 
-      const line = `      <tr>
+        const href = formatWebsiteUrl(row.website);
+        const websiteLink = href
+          ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(row.website)}</a>`
+          : '-';
+
+        yield `      <tr>
         <td>${rowIdx++}</td>
         <td><strong>${escapeHtml(row.organization_name)}</strong></td>
         <td>${escapeHtml(row.country || '-')}${row.city ? ` / ${escapeHtml(row.city)}` : ''}</td>
-        <td>${row.website ? `<a href="${escapeHtml(row.website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(row.website)}</a>` : '-'}</td>
+        <td>${websiteLink}</td>
         <td>${escapeHtml(row.whatsapp || '-')}</td>
         <td>${escapeHtml(row.phone || '-')}</td>
         <td>${escapeHtml(row.contact_person || '-')}</td>
@@ -211,16 +149,15 @@ export const exportRoutes: FastifyPluginAsync = async (fastify) => {
         ${user.role === 'admin' ? `<td>${escapeHtml(row.assigned_name || 'Havuzda')}</td>` : ''}
         <td>${escapeHtmlWithLineBreaks(row.note || '-')}</td>
       </tr>\n`;
+      }
 
-      stream.push(line);
-    }
-
-    stream.push(`    </tbody>
+      yield `    </tbody>
   </table>
 </body>
-</html>`);
-    stream.push(null);
+</html>\n`;
+    }
 
+    const stream = Readable.from(generateHtml());
     return reply.send(stream);
   });
 };

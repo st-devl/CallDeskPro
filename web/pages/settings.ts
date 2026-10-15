@@ -11,6 +11,22 @@ export function renderSettingsPage(container: HTMLElement, currentUser: any) {
     waMode = 'app';
   }
 
+  let uncontactedLimit = 1;
+
+  async function loadAdminSettings() {
+    if (currentUser.role !== 'admin') return;
+    try {
+      const res = await api.get('admin/settings');
+      if (res && res.uncontacted_limit) {
+        uncontactedLimit = res.uncontacted_limit;
+        const input = container.querySelector('#set-limit') as HTMLInputElement;
+        if (input) input.value = String(uncontactedLimit);
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Ayarlar yüklenemedi', 'error');
+    }
+  }
+
   function render() {
     container.innerHTML = html`
       <div style="max-width: 650px;">
@@ -28,11 +44,11 @@ export function renderSettingsPage(container: HTMLElement, currentUser: any) {
 
           <div style="display: flex; flex-direction: column; gap: 0.6rem;">
             <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; cursor: pointer;">
-              <input type="radio" name="wa-mode" value="app" ${waMode === 'app' ? 'checked' : ''} />
+              <input type="radio" name="wa-mode" value="app" ${waMode === 'app' ? raw('checked') : ''} />
               <span><strong>Masaüstü Uygulaması</strong> (Varsayılan - <code>whatsapp://</code> protokolü)</span>
             </label>
             <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; cursor: pointer;">
-              <input type="radio" name="wa-mode" value="web" ${waMode === 'web' ? 'checked' : ''} />
+              <input type="radio" name="wa-mode" value="web" ${waMode === 'web' ? raw('checked') : ''} />
               <span><strong>WhatsApp Web</strong> (Tarayıcı sekmesinde açılır)</span>
             </label>
           </div>
@@ -71,7 +87,7 @@ export function renderSettingsPage(container: HTMLElement, currentUser: any) {
             <div style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1.5rem;">
               <div class="form-group" style="margin-bottom: 0; width: 220px;">
                 <label class="form-label" for="set-limit">Aramacı Başına Görüşülmemiş Limit</label>
-                <input class="form-control" type="number" id="set-limit" min="1" max="10" value="1" />
+                <input class="form-control" type="number" id="set-limit" min="1" max="10" value="${uncontactedLimit}" />
               </div>
               <button type="button" class="btn btn-primary" id="btn-save-limit">Kaydet</button>
             </div>
@@ -121,7 +137,30 @@ export function renderSettingsPage(container: HTMLElement, currentUser: any) {
         alertBox.style.display = 'block';
       }
     });
+
+    // Yönetici Limit Kaydetme
+    const saveLimitBtn = container.querySelector('#btn-save-limit') as HTMLButtonElement;
+    saveLimitBtn?.addEventListener('click', async () => {
+      const input = container.querySelector('#set-limit') as HTMLInputElement;
+      const val = parseInt(input?.value || '1', 10);
+      if (isNaN(val) || val < 1 || val > 10) {
+        showToast('Limit 1 ile 10 arasında bir tam sayı olmalıdır.', 'error');
+        return;
+      }
+
+      saveLimitBtn.disabled = true;
+      try {
+        await api.put('admin/settings', { uncontacted_limit: val });
+        uncontactedLimit = val;
+        showToast('Limit ayarı başarıyla güncellendi.', 'success');
+      } catch (err: any) {
+        showToast(err.message || 'Ayar kaydedilemedi.', 'error');
+      } finally {
+        saveLimitBtn.disabled = false;
+      }
+    });
   }
 
   render();
+  loadAdminSettings();
 }

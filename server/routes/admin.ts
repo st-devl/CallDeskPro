@@ -193,4 +193,30 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
 
     return reply.send(stream);
   });
+
+  // Sistem Ayarlarını Getir
+  fastify.get('/settings', async () => {
+    const row = db.prepare("SELECT value FROM settings WHERE key = 'uncontacted_limit'").get() as { value: string } | undefined;
+    const limit = row ? parseInt(row.value, 10) : 1;
+    return {
+      uncontacted_limit: isNaN(limit) ? 1 : limit
+    };
+  });
+
+  // Sistem Ayarlarını Güncelle
+  fastify.put('/settings', async (request: FastifyRequest, reply: FastifyReply) => {
+    const { uncontacted_limit } = (request.body as any) || {};
+    const limit = parseInt(uncontacted_limit, 10);
+    if (isNaN(limit) || limit < 1 || limit > 10) {
+      return reply.status(400).send({ error: 'Aramacı başına görüşülmemiş limit 1 ile 10 arasında bir tam sayı olmalıdır' });
+    }
+
+    db.prepare("INSERT INTO settings (key, value) VALUES ('uncontacted_limit', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(String(limit));
+
+    return reply.send({
+      success: true,
+      message: 'Ayarlar güncellendi',
+      uncontacted_limit: limit
+    });
+  });
 };
