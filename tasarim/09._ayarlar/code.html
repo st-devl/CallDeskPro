@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface-bright" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CallDesk Pro - Ayarlar</title>
+<!-- Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Forms and Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-bright": "#f8f9ff",
+            "on-secondary-fixed-variant": "#003ea8",
+            "tertiary": "#00190e",
+            "on-primary-fixed": "#111c2d",
+            "on-secondary": "#ffffff",
+            "inverse-primary": "#bcc7de",
+            "on-surface": "#0b1c30",
+            "surface-variant": "#d3e4fe",
+            "on-secondary-fixed": "#00174b",
+            "secondary-fixed": "#dbe1ff",
+            "surface-container-low": "#eff4ff",
+            "on-secondary-container": "#fefcff",
+            "secondary": "#0051d5",
+            "surface-container-lowest": "#ffffff",
+            "on-surface-variant": "#45474c",
+            "outline": "#75777d",
+            "inverse-surface": "#213145",
+            "tertiary-container": "#00301e",
+            "primary-fixed": "#d8e3fb",
+            "surface-container-highest": "#d3e4fe",
+            "on-error-container": "#93000a",
+            "primary-container": "#1e293b",
+            "surface-tint": "#545f73",
+            "error": "#ba1a1a",
+            "surface": "#f8f9ff",
+            "tertiary-fixed-dim": "#4edea3",
+            "background": "#f8f9ff",
+            "secondary-fixed-dim": "#b4c5ff",
+            "error-container": "#ffdad6",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed-variant": "#005236",
+            "on-tertiary": "#ffffff",
+            "surface-container": "#e5eeff",
+            "surface-dim": "#cbdbf5",
+            "primary": "#091426",
+            "surface-container-high": "#dce9ff",
+            "primary-fixed-dim": "#bcc7de",
+            "on-tertiary-fixed": "#002113",
+            "on-background": "#0b1c30",
+            "outline-variant": "#c5c6cd",
+            "on-primary-fixed-variant": "#3c475a",
+            "tertiary-fixed": "#6ffbbe",
+            "on-primary-container": "#8590a6",
+            "on-primary": "#ffffff",
+            "secondary-container": "#316bf3",
+            "on-tertiary-container": "#00a472",
+            "inverse-on-surface": "#eaf1ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1rem",
+            "space-sm": "0.5rem",
+            "margin": "1.5rem",
+            "margin-mobile": "1rem",
+            "gutter-compact": "0.75rem",
+            "space-md": "0.75rem",
+            "space-lg": "1.25rem",
+            "space-xs": "0.25rem",
+            "space-xl": "2rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "tabular-numeric": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-xl": ["Inter"],
+            "body-sm": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "tabular-numeric": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "700" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0.005em", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full bg-surface-bright font-body-md text-on-surface antialiased selection:bg-surface-variant">
+<!-- ========================================================================= -->
+<!-- SideNavBar Component (Shared Anchor)                                      -->
+<!-- ========================================================================= -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col justify-between p-4 w-64 border-r border-outline-variant dark:border-outline bg-surface-container-lowest dark:bg-primary transition-all duration-200">
+<!-- Top Branding & Navigation -->
+<div class="flex flex-col gap-6">
+<!-- App Brand Logo Header -->
+<div class="flex items-center gap-3 px-2 py-1">
+<div class="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-on-secondary shadow-sm">
+<span class="material-symbols-outlined text-[24px]">phone_in_talk</span>
+</div>
+<div class="flex flex-col">
+<span class="text-headline-sm font-headline-sm font-bold text-primary dark:text-surface-bright leading-tight">CallDesk Pro</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant font-medium">Lead &amp; Queue Mgmt</span>
+</div>
+</div>
+<!-- Quick Action CTA -->
+<button class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-primary-container text-on-secondary font-label-md text-label-md hover:bg-primary transition-colors scale-99 active:scale-95 duration-150 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+<span>Sıradakini Al</span>
+</button>
+<!-- Nav Section Header -->
+<div class="px-2">
+<span class="text-label-sm font-label-sm tracking-wider uppercase text-outline font-semibold">MENÜ</span>
+</div>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-1">
+<!-- Tab 0: Aramacı / Kayıtlarım -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-low dark:hover:bg-primary-container/50 font-normal hover:bg-surface-container-low dark:hover:bg-primary-container/50 hover:text-on-surface dark:hover:text-surface-bright transition-colors scale-99 transition-all duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px]">phone_in_talk</span>
+<span class="text-label-md font-label-md">Aramacı / Kayıtlarım</span>
+</a>
+<!-- Tab 1: Yönetici / Kayıtlar -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-low dark:hover:bg-primary-container/50 font-normal hover:bg-surface-container-low dark:hover:bg-primary-container/50 hover:text-on-surface dark:hover:text-surface-bright transition-colors scale-99 transition-all duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px]">folder_shared</span>
+<span class="text-label-md font-label-md">Yönetici / Kayıtlar</span>
+</a>
+<!-- Tab 2: Listeler -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-low dark:hover:bg-primary-container/50 font-normal hover:bg-surface-container-low dark:hover:bg-primary-container/50 hover:text-on-surface dark:hover:text-surface-bright transition-colors scale-99 transition-all duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px]">format_list_bulleted</span>
+<span class="text-label-md font-label-md">Listeler</span>
+</a>
+<!-- Tab 3: Kullanıcılar -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-low dark:hover:bg-primary-container/50 font-normal hover:bg-surface-container-low dark:hover:bg-primary-container/50 hover:text-on-surface dark:hover:text-surface-bright transition-colors scale-99 transition-all duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span class="text-label-md font-label-md">Kullanıcılar</span>
+</a>
+<!-- Tab 4: Görüşme Kayıtları -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-low dark:hover:bg-primary-container/50 font-normal hover:bg-surface-container-low dark:hover:bg-primary-container/50 hover:text-on-surface dark:hover:text-surface-bright transition-colors scale-99 transition-all duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px]">record_voice_over</span>
+<span class="text-label-md font-label-md">Görüşme Kayıtları</span>
+</a>
+<!-- Tab 5: Özet -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-low dark:hover:bg-primary-container/50 font-normal hover:bg-surface-container-low dark:hover:bg-primary-container/50 hover:text-on-surface dark:hover:text-surface-bright transition-colors scale-99 transition-all duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="text-label-md font-label-md">Özet</span>
+</a>
+<!-- Tab 6: Ayarlar (ACTIVE DESTINATION) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-surface-container dark:bg-primary-container text-secondary dark:text-inverse-primary font-medium scale-99 transition-all duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-label-md font-label-md">Ayarlar</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Controls & Logout -->
+<div class="flex flex-col gap-2 pt-4 border-t border-outline-variant/60">
+<button class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low text-label-md font-label-md transition-colors">
+<span class="material-symbols-outlined text-[18px]">keyboard_double_arrow_left</span>
+<span>Menüyü Daralt</span>
+</button>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-error hover:bg-error-container/40 transition-colors text-label-md font-label-md" href="#">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span>Çıkış Yap</span>
+</a>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- TopNavBar Component (Shared Anchor)                                       -->
+<!-- ========================================================================= -->
+<header class="fixed top-0 right-0 left-64 h-16 z-30 flex items-center justify-between px-6 bg-surface-container-lowest dark:bg-primary border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none">
+<!-- Left: Search Box -->
+<div class="relative w-80">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+<input class="w-full h-9 pl-9 pr-4 rounded-lg bg-surface-bright border border-outline-variant text-body-sm font-body-sm text-on-surface placeholder:text-outline focus:border-secondary focus:ring-2 focus:ring-secondary/15 transition-all outline-none" placeholder="Ayar veya kullanıcı ara..." type="search"/>
+</div>
+<!-- Right Controls: Actions, Notifications, Profile Avatar -->
+<div class="flex items-center gap-3">
+<!-- Trailing Secondary: Filtrele -->
+<button class="h-9 px-3 rounded-lg border border-outline-variant hover:bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+<span>Filtrele</span>
+</button>
+<!-- Trailing Primary: Sıradakini Al -->
+<button class="h-9 px-3.5 rounded-lg bg-primary-container text-on-secondary font-label-md text-label-md hover:bg-primary transition-colors flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">headset_mic</span>
+<span>Sıradakini Al</span>
+</button>
+<div class="h-6 w-px bg-outline-variant mx-1"></div>
+<!-- Trailing Icon Actions -->
+<button class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+<!-- Operator Profile Identity -->
+<div class="flex items-center gap-2.5 pl-2">
+<div class="w-9 h-9 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-semibold text-label-md border border-secondary-fixed-dim">
+          M
+        </div>
+<div class="flex flex-col text-left">
+<span class="text-label-md font-label-md font-semibold text-on-surface leading-tight">Mehmet Koç</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Yönetici</span>
+</div>
+</div>
+</div>
+</header>
+<!-- ========================================================================= -->
+<!-- Main Content Canvas (Ayarlar Page Content)                                 -->
+<!-- ========================================================================= -->
+<main class="ml-64 pt-16 min-h-screen bg-surface-bright p-8">
+<div class="max-w-7xl mx-auto space-y-6">
+<!-- Page Header -->
+<div class="flex items-center justify-between pb-2">
+<div>
+<h1 class="text-headline-xl font-headline-xl text-on-surface tracking-tight">Ayarlar</h1>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Kişisel hesap tercihlerinizi ve güvenlik yapılandırmanızı yönetin.</p>
+</div>
+<!-- Live System Indicator Micro-Pill -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-lowest border border-outline-variant/60 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim inline-block"></span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Oturum: Aktif (IP: 192.168.1.104)</span>
+</div>
+</div>
+<!-- Split Layout: Settings Sub-navigation & Settings Forms -->
+<div class="grid grid-cols-12 gap-8 items-start">
+<!-- Sub-Navigation Panel (Tabs) -->
+<div class="col-span-12 lg:col-span-3 flex flex-col gap-1.5">
+<!-- Active Tab: Profil Bilgileri -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-all shadow-sm" href="#profil">
+<span class="material-symbols-outlined text-[20px]">person</span>
+<span>Profil Bilgileri</span>
+</a>
+<!-- Tab: Güvenlik -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface font-label-md text-label-md font-medium transition-colors" href="#guvenlik">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+<span>Güvenlik</span>
+</a>
+<!-- Tab: Sistem Tercihleri -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface font-label-md text-label-md font-medium transition-colors" href="#tercihler">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+<span>Sistem Tercihleri</span>
+</a>
+<!-- Secondary Tab Info Badge -->
+<div class="mt-6 p-4 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-body-sm font-body-sm text-on-surface-variant shadow-sm">
+<div class="flex items-center gap-2 text-on-surface font-label-md text-label-md mb-1 font-semibold">
+<span class="material-symbols-outlined text-secondary text-[18px]">verified_user</span>
+<span>Yönetici Ayrıcalığı</span>
+</div>
+<p class="text-label-sm font-label-sm text-outline leading-relaxed">
+              Hesabınız tam yönetici yetkisine sahiptir. Değişiklikler anında sistem genelinde geçerli olur.
+            </p>
+</div>
+</div>
+<!-- Right Side Forms Canvas -->
+<div class="col-span-12 lg:col-span-9 flex flex-col gap-6">
+<!-- Card 1: Profil Bilgileri -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/70 shadow-sm p-6 lg:p-7">
+<!-- Card Header -->
+<div class="flex items-center justify-between border-b border-surface-container-low pb-4 mb-6">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Profil Bilgileri</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Operatör ve yönetici paneli kimlik detayları.</p>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-surface-container text-secondary text-label-sm font-label-sm font-semibold">
+                Aktif Hesap
+              </span>
+</div>
+<!-- Form Grid: 2 Columns -->
+<form class="space-y-6" onsubmit="event.preventDefault();">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<!-- Field: Ad Soyad -->
+<div class="flex flex-col gap-1.5">
+<label class="text-label-md font-label-md font-medium text-on-surface">Ad Soyad</label>
+<input class="h-10 px-3.5 rounded-lg bg-surface-container-lowest border border-outline-variant text-body-md font-body-md text-on-surface focus:border-secondary focus:ring-2 focus:ring-secondary/15 transition-all outline-none" type="text" value="Mehmet Koç"/>
+</div>
+<!-- Field: Kullanıcı Adı -->
+<div class="flex flex-col gap-1.5">
+<label class="text-label-md font-label-md font-medium text-on-surface">Kullanıcı Adı</label>
+<input class="h-10 px-3.5 rounded-lg bg-surface-container-lowest border border-outline-variant text-body-md font-body-md text-on-surface focus:border-secondary focus:ring-2 focus:ring-secondary/15 transition-all outline-none" type="text" value="admin"/>
+</div>
+<!-- Field: E-posta -->
+<div class="flex flex-col gap-1.5">
+<label class="text-label-md font-label-md font-medium text-on-surface">E-posta</label>
+<input class="h-10 px-3.5 rounded-lg bg-surface-container-lowest border border-outline-variant text-body-md font-body-md text-on-surface focus:border-secondary focus:ring-2 focus:ring-secondary/15 transition-all outline-none" type="email" value="mehmet@example.com"/>
+</div>
+<!-- Field: Rol (Read-only / Badge) -->
+<div class="flex flex-col gap-1.5">
+<label class="text-label-md font-label-md font-medium text-on-surface">Rol</label>
+<div class="relative">
+<input class="h-10 px-3.5 rounded-lg bg-surface-container-low border border-outline-variant/60 text-body-md font-body-md text-on-surface-variant cursor-not-allowed select-none" readonly="" type="text" value="Yönetici"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">lock</span>
+</div>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="flex items-center justify-end pt-2 border-t border-surface-container-low">
+<button class="h-10 px-6 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md font-medium hover:bg-on-secondary-fixed-variant active:scale-95 transition-all duration-150 shadow-sm flex items-center gap-2" type="submit">
+<span class="material-symbols-outlined text-[18px]">check</span>
+<span>Değişiklikleri Kaydet</span>
+</button>
+</div>
+</form>
+</div>
+<!-- Card 2: Şifre Değiştir -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/70 shadow-sm p-6 lg:p-7">
+<!-- Card Header -->
+<div class="flex items-center justify-between border-b border-surface-container-low pb-4 mb-6">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Şifre Değiştir</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Hesap güvenliğinizi sağlamak için karmaşık bir şifre tercih edin.</p>
+</div>
+<span class="material-symbols-outlined text-outline text-[22px]">lock_reset</span>
+</div>
+<!-- Form Grid: 2 Columns -->
+<form class="space-y-6" onsubmit="event.preventDefault();">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<!-- Field: Mevcut Şifre -->
+<div class="flex flex-col gap-1.5">
+<label class="text-label-md font-label-md font-medium text-on-surface">Mevcut Şifre</label>
+<div class="relative">
+<input class="w-full h-10 px-3.5 pr-10 rounded-lg bg-surface-container-lowest border border-outline-variant text-body-md font-body-md text-on-surface focus:border-secondary focus:ring-2 focus:ring-secondary/15 transition-all outline-none" placeholder="••••••••" type="password" value="secretPass123"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</div>
+<!-- Field: Yeni Şifre -->
+<div class="flex flex-col gap-1.5">
+<label class="text-label-md font-label-md font-medium text-on-surface">Yeni Şifre</label>
+<div class="relative">
+<input class="w-full h-10 px-3.5 pr-10 rounded-lg bg-surface-container-lowest border border-outline-variant text-body-md font-body-md text-on-surface placeholder:text-outline focus:border-secondary focus:ring-2 focus:ring-secondary/15 transition-all outline-none" placeholder="Yeni şifreniz" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility_off</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Password Guidelines Hint -->
+<div class="p-3.5 rounded-lg bg-surface-bright border border-outline-variant/40 flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">info</span>
+<p class="text-label-sm font-label-sm text-on-surface-variant leading-relaxed">
+                  Şifreniz en az 8 karakter, bir büyük harf, bir rakam ve en az bir özel simge içermelidir.
+                </p>
+</div>
+<!-- Action Bar -->
+<div class="flex items-center justify-end pt-2 border-t border-surface-container-low">
+<button class="h-10 px-6 rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low text-on-surface font-label-md text-label-md font-medium active:scale-95 transition-all duration-150 shadow-sm flex items-center gap-2" type="submit">
+<span class="material-symbols-outlined text-[18px]">key</span>
+<span>Şifreyi Güncelle</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,25 @@
+# Bağımlılıklar
+node_modules/
+
+# Derleme Çıktıları
+dist/
+
+# Veri ve Veritabanı (Güvenlik gereği kesinlikle commit edilmez)
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Ortam değişkenleri ve gizli anahtarlar
+.env
+.env.local
+
+# Sistem ve Editör Dosyaları
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Loglar
+*.log
+npm-debug.log*

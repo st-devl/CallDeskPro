@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface-bright" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CallDesk Pro - Kullanıcılar</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-bright": "#f8f9ff",
+            "on-secondary-fixed-variant": "#003ea8",
+            "tertiary": "#00190e",
+            "on-primary-fixed": "#111c2d",
+            "on-secondary": "#ffffff",
+            "inverse-primary": "#bcc7de",
+            "on-surface": "#0b1c30",
+            "surface-variant": "#d3e4fe",
+            "on-secondary-fixed": "#00174b",
+            "secondary-fixed": "#dbe1ff",
+            "surface-container-low": "#eff4ff",
+            "on-secondary-container": "#fefcff",
+            "secondary": "#0051d5",
+            "surface-container-lowest": "#ffffff",
+            "on-surface-variant": "#45474c",
+            "outline": "#75777d",
+            "inverse-surface": "#213145",
+            "tertiary-container": "#00301e",
+            "primary-fixed": "#d8e3fb",
+            "surface-container-highest": "#d3e4fe",
+            "on-error-container": "#93000a",
+            "primary-container": "#1e293b",
+            "surface-tint": "#545f73",
+            "error": "#ba1a1a",
+            "surface": "#f8f9ff",
+            "tertiary-fixed-dim": "#4edea3",
+            "background": "#f8f9ff",
+            "secondary-fixed-dim": "#b4c5ff",
+            "error-container": "#ffdad6",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed-variant": "#005236",
+            "on-tertiary": "#ffffff",
+            "surface-container": "#e5eeff",
+            "surface-dim": "#cbdbf5",
+            "primary": "#091426",
+            "surface-container-high": "#dce9ff",
+            "primary-fixed-dim": "#bcc7de",
+            "on-tertiary-fixed": "#002113",
+            "on-background": "#0b1c30",
+            "outline-variant": "#c5c6cd",
+            "on-primary-fixed-variant": "#3c475a",
+            "tertiary-fixed": "#6ffbbe",
+            "on-primary-container": "#8590a6",
+            "on-primary": "#ffffff",
+            "secondary-container": "#316bf3",
+            "on-tertiary-container": "#00a472",
+            "inverse-on-surface": "#eaf1ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1rem",
+            "space-sm": "0.5rem",
+            "margin": "1.5rem",
+            "margin-mobile": "1rem",
+            "gutter-compact": "0.75rem",
+            "space-md": "0.75rem",
+            "space-lg": "1.25rem",
+            "space-xs": "0.25rem",
+            "space-xl": "2rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "tabular-numeric": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-xl": ["Inter"],
+            "body-sm": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "tabular-numeric": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "700" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0.005em", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body class="h-full bg-surface-bright text-on-surface antialiased overflow-hidden flex font-body-md text-body-md">
+<!-- Left Sidebar (SideNavBar Anchor) -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col justify-between p-4 w-64 bg-surface-container-lowest border-r border-outline-variant">
+<div class="flex flex-col gap-6">
+<!-- App Brand Logo Header -->
+<div class="flex items-center gap-3 px-2 py-1">
+<div class="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-on-secondary shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">phone_in_talk</span>
+</div>
+<div>
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary">CallDesk Pro</h1>
+<p class="text-label-sm font-label-sm text-on-surface-variant font-medium">Lead &amp; Queue Mgmt</p>
+</div>
+</div>
+<!-- Quick Action / Call-to-action Button -->
+<button class="w-full flex items-center justify-center gap-2 bg-primary-container text-on-secondary px-4 py-2.5 rounded-lg text-label-md font-label-md hover:bg-primary transition-all duration-150 active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">play_circle</span>
+<span>Sıradakini Al</span>
+</button>
+<!-- Navigation Section -->
+<div class="flex flex-col gap-1">
+<span class="px-3 text-label-sm font-label-sm text-outline uppercase tracking-wider mb-1 font-semibold">MENÜ</span>
+<nav class="flex flex-col gap-1">
+<!-- 1. Aramacı / Kayıtlarım -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface font-normal transition-colors" href="#">
+<span class="material-symbols-outlined">phone_in_talk</span>
+<span class="text-body-sm font-body-sm">Aramacı / Kayıtlarım</span>
+</a>
+<!-- 2. Yönetici / Kayıtlar -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface font-normal transition-colors" href="#">
+<span class="material-symbols-outlined">folder_shared</span>
+<span class="text-body-sm font-body-sm">Yönetici / Kayıtlar</span>
+</a>
+<!-- 3. Listeler -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface font-normal transition-colors" href="#">
+<span class="material-symbols-outlined">format_list_bulleted</span>
+<span class="text-body-sm font-body-sm">Listeler</span>
+</a>
+<!-- 4. Kullanıcılar (ACTIVE TAB) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-surface-container text-secondary font-medium" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="text-body-sm font-body-sm font-medium">Kullanıcılar</span>
+</a>
+<!-- 5. Görüşme Kayıtları -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface font-normal transition-colors" href="#">
+<span class="material-symbols-outlined">record_voice_over</span>
+<span class="text-body-sm font-body-sm">Görüşme Kayıtları</span>
+</a>
+<!-- 6. Özet -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface font-normal transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-body-sm font-body-sm">Özet</span>
+</a>
+<!-- 7. Ayarlar -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface font-normal transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-body-sm font-body-sm">Ayarlar</span>
+</a>
+</nav>
+</div>
+</div>
+<!-- Sidebar Footer -->
+<div class="border-t border-outline-variant pt-3 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface font-normal transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-body-sm font-body-sm">Çıkış Yap</span>
+</a>
+<div class="flex items-center justify-between px-3 py-2 text-label-sm font-label-sm text-outline">
+<span>v2.4.0 • Canlı Hat</span>
+<span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim animate-pulse"></span>
+          Bağlı
+        </span>
+</div>
+</div>
+</aside>
+<!-- Main View Area (Header + Split Content) -->
+<div class="ml-64 flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar (Shared Component) -->
+<header class="h-16 flex-none bg-surface-container-lowest border-b border-outline-variant flex items-center justify-between px-6 z-30 shadow-sm">
+<div class="flex items-center gap-4 flex-1 max-w-md">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-9 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-lg text-body-sm font-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/15 transition-all" placeholder="Kullanıcı, e-posta veya ID ara..." type="text"/>
+</div>
+</div>
+<!-- Trailing Elements -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 border-r border-outline-variant pr-4">
+<button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" title="Bildirimler">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" title="Yardım">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<!-- Trailing CTA and Profile Header Anchor -->
+<button class="hidden lg:flex items-center gap-2 bg-surface-container-low text-secondary border border-secondary/30 px-3 py-2 rounded-lg text-label-md font-label-md hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_alt</span>
+<span>Filtrele</span>
+</button>
+<div class="flex items-center gap-3 pl-2">
+<div class="w-9 h-9 rounded-full bg-surface-container text-secondary font-headline-sm font-semibold flex items-center justify-center text-sm ring-2 ring-surface-variant">
+            M
+          </div>
+<div class="flex flex-col text-left">
+<span class="text-body-sm font-body-sm font-semibold text-on-surface leading-tight">Mehmet Koç</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Yönetici</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Operational Split Canvas -->
+<main class="flex-1 overflow-y-auto p-6 bg-surface-bright flex gap-6">
+<!-- Primary Left Column: User Management Table & Controls -->
+<div class="flex-1 flex flex-col gap-4 min-w-0">
+<!-- Action Header & Metrics Strip -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-3">
+<h2 class="text-headline-lg font-headline-lg font-bold text-on-surface">Kullanıcılar</h2>
+<span class="px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container text-secondary font-semibold border border-outline-variant/60">
+                6 Kayıt
+              </span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Sistemdeki aktif ve pasif operatör listesi ile yetkilendirme ayarları.</p>
+</div>
+<!-- Quick Filter Segment Control -->
+<div class="flex items-center gap-2">
+<div class="inline-flex p-1 bg-surface-container-low rounded-lg border border-outline-variant">
+<button class="px-3 py-1.5 rounded-md text-label-md font-label-md bg-surface-container-lowest text-secondary font-medium shadow-xs">Tümü</button>
+<button class="px-3 py-1.5 rounded-md text-label-md font-label-md text-on-surface-variant hover:text-on-surface font-normal transition-colors">Yönetici</button>
+<button class="px-3 py-1.5 rounded-md text-label-md font-label-md text-on-surface-variant hover:text-on-surface font-normal transition-colors">Aramacı</button>
+</div>
+<button class="p-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low" title="Yenile">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+</button>
+</div>
+</div>
+<!-- Table Container Card (Level 1 Elevation) -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden flex flex-col flex-1">
+<div class="overflow-x-auto flex-1">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-bright border-b border-outline-variant h-10">
+<th class="py-2 px-4 text-label-sm font-label-sm text-outline font-semibold uppercase tracking-wider">Ad Soyad</th>
+<th class="py-2 px-4 text-label-sm font-label-sm text-outline font-semibold uppercase tracking-wider">Kullanıcı Adı</th>
+<th class="py-2 px-4 text-label-sm font-label-sm text-outline font-semibold uppercase tracking-wider">Rol</th>
+<th class="py-2 px-4 text-label-sm font-label-sm text-outline font-semibold uppercase tracking-wider">Durum</th>
+<th class="py-2 px-4 text-label-sm font-label-sm text-outline font-semibold uppercase tracking-wider text-right">İşlem</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-high/60">
+<!-- Row 1: Ahmet Yılmaz -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container text-secondary font-semibold text-xs flex items-center justify-center tracking-tight">
+                        AY
+                      </div>
+<span class="font-medium text-body-md font-body-md text-on-surface">Ahmet Yılmaz</span>
+</div>
+</td>
+<td class="py-3 px-4 text-body-sm font-body-sm text-on-surface-variant">ahmet</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container-low text-on-surface-variant font-medium border border-outline-variant/60">
+                      Aramacı
+                    </span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Aktif
+                    </span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="w-8 h-8 rounded-md inline-flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: Zeynep Arslan -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-semibold text-xs flex items-center justify-center tracking-tight">
+                        ZA
+                      </div>
+<span class="font-medium text-body-md font-body-md text-on-surface">Zeynep Arslan</span>
+</div>
+</td>
+<td class="py-3 px-4 text-body-sm font-body-sm text-on-surface-variant">zeynep</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container-low text-on-surface-variant font-medium border border-outline-variant/60">
+                      Aramacı
+                    </span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Aktif
+                    </span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="w-8 h-8 rounded-md inline-flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: Mehmet Kaya -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container text-secondary font-semibold text-xs flex items-center justify-center tracking-tight">
+                        MK
+                      </div>
+<span class="font-medium text-body-md font-body-md text-on-surface">Mehmet Kaya</span>
+</div>
+</td>
+<td class="py-3 px-4 text-body-sm font-body-sm text-on-surface-variant">mehmet</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container-low text-on-surface-variant font-medium border border-outline-variant/60">
+                      Aramacı
+                    </span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Aktif
+                    </span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="w-8 h-8 rounded-md inline-flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: Ayşe Demir -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-semibold text-xs flex items-center justify-center tracking-tight">
+                        AD
+                      </div>
+<span class="font-medium text-body-md font-body-md text-on-surface">Ayşe Demir</span>
+</div>
+</td>
+<td class="py-3 px-4 text-body-sm font-body-sm text-on-surface-variant">ayse</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container-low text-on-surface-variant font-medium border border-outline-variant/60">
+                      Aramacı
+                    </span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Aktif
+                    </span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="w-8 h-8 rounded-md inline-flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 5: Mehmet Koç (Manager) -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-secondary font-bold text-xs flex items-center justify-center tracking-tight ring-1 ring-secondary/20">
+                        MK
+                      </div>
+<div class="flex items-center gap-2">
+<span class="font-medium text-body-md font-body-md text-on-surface">Mehmet Koç</span>
+<span class="text-[10px] bg-secondary/10 text-secondary font-semibold px-1.5 py-0.2 rounded">Siz</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-body-sm font-body-sm text-on-surface-variant">admin</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-secondary-fixed text-on-secondary-fixed font-semibold">
+                      Yönetici
+                    </span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Aktif
+                    </span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="w-8 h-8 rounded-md inline-flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 6: Hakan Şahin (Passive) -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant font-semibold text-xs flex items-center justify-center tracking-tight">
+                        HŞ
+                      </div>
+<span class="font-medium text-body-md font-body-md text-on-surface">Hakan Şahin</span>
+</div>
+</td>
+<td class="py-3 px-4 text-body-sm font-body-sm text-on-surface-variant">hakan</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container-low text-on-surface-variant font-medium border border-outline-variant/60">
+                      Aramacı
+                    </span>
+</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-label-sm font-label-sm bg-error-container/40 text-error border border-error/20">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                      Pasif
+                    </span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="w-8 h-8 rounded-md inline-flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Bar -->
+<div class="h-14 px-4 border-t border-outline-variant flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant bg-surface-bright">
+<span class="text-label-sm font-label-sm">1–8 / 6 kayıt listeleniyor</span>
+<div class="flex items-center gap-1.5">
+<button class="w-8 h-8 flex items-center justify-center rounded-md border border-outline-variant text-outline hover:bg-surface-container-low disabled:opacity-40" disabled="">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-md bg-secondary text-on-secondary font-semibold text-xs shadow-xs">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-md text-on-surface-variant hover:bg-surface-container-low text-xs">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-md text-on-surface-variant hover:bg-surface-container-low text-xs">3</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-md text-on-surface-variant hover:bg-surface-container-low text-xs">4</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-md border border-outline-variant text-outline hover:bg-surface-container-low">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+<div class="flex items-center gap-2">
+<select class="text-xs bg-surface-container-lowest border border-outline-variant rounded-md py-1.5 px-2.5 text-on-surface-variant focus:outline-none focus:border-secondary">
+<option>20 / sayfa</option>
+<option>50 / sayfa</option>
+<option>100 / sayfa</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Right Column: "Yeni Kullanıcı" Form Drawer Panel -->
+<aside class="w-96 flex-none bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm flex flex-col h-fit">
+<!-- Panel Header -->
+<div class="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">person_add</span>
+<h3 class="text-headline-sm font-headline-sm font-bold text-on-surface">Yeni Kullanıcı</h3>
+</div>
+<button class="text-outline hover:text-on-surface p-1 rounded-md hover:bg-surface-container-low transition-colors" title="Kapat">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Panel Form Body -->
+<form class="p-5 flex flex-col gap-4">
+<!-- Field: Ad Soyad -->
+<div class="flex flex-col gap-1.5">
+<label class="text-label-md font-label-md font-medium text-on-surface">Ad Soyad</label>
+<input class="w-full h-10 px-3 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-sm font-body-sm text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/15 transition-all" placeholder="Ad ve soyad girin" type="text"/>
+</div>
+<!-- Field: Kullanıcı Adı -->
+<div class="flex flex-col gap-1.5">
+<label class="text-label-md font-label-md font-medium text-on-surface">Kullanıcı Adı</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xs">@</span>
+<input class="w-full h-10 pl-7 pr-3 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-sm font-body-sm text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/15 transition-all" placeholder="kullanici_adi" type="text"/>
+</div>
+</div>
+<!-- Field: Geçici Şifre -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="text-label-md font-label-md font-medium text-on-surface">Şifre</label>
+<button class="text-label-sm font-label-sm text-secondary hover:underline" type="button">Otomatik Üret</button>
+</div>
+<div class="relative">
+<input class="w-full h-10 px-3 pr-10 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-sm font-body-sm text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/15 transition-all" placeholder="En az 8 karakter" type="password"/>
+<button class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface text-[18px]" type="button">
+                visibility
+              </button>
+</div>
+</div>
+<!-- Field: Rol -->
+<div class="flex flex-col gap-1.5">
+<label class="text-label-md font-label-md font-medium text-on-surface">Rol</label>
+<div class="relative">
+<select class="w-full h-10 pl-3 pr-8 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-sm font-body-sm text-on-surface focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/15 appearance-none">
+<option selected="" value="aramaci">Aramacı</option>
+<option value="yonetici">Yönetici</option>
+<option value="takim_lideri">Takım Lideri</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-[18px]">
+                expand_more
+              </span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-0.5">Operatör kuyruktan çağrı alabilir ve kayıt işleyebilir.</p>
+</div>
+<!-- Field: Durum (Toggle Switch) -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low border border-outline-variant">
+<div class="flex flex-col">
+<span class="text-body-sm font-body-sm font-medium text-on-surface">Durum</span>
+<span class="text-label-sm font-label-sm text-emerald-700 font-medium">Kullanıcı hemen aktif edilsin</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+</label>
+</div>
+<!-- Form Buttons -->
+<div class="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant mt-2">
+<button class="px-4 py-2 text-label-md font-label-md font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg transition-colors" type="button">
+              Vazgeç
+            </button>
+<button class="flex items-center gap-2 bg-secondary text-on-secondary px-5 py-2.5 rounded-lg text-label-md font-label-md font-semibold hover:bg-secondary-container transition-all active:scale-95 shadow-sm" type="submit">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>Kullanıcı Ekle</span>
+</button>
+</div>
+</form>
+</aside>
+</main>
+</div>
+</body></html>

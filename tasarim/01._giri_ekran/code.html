@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CallDesk Pro - Giriş Yap</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-bright": "#f8f9ff",
+            "on-secondary-fixed-variant": "#003ea8",
+            "tertiary": "#00190e",
+            "on-primary-fixed": "#111c2d",
+            "on-secondary": "#ffffff",
+            "inverse-primary": "#bcc7de",
+            "on-surface": "#0b1c30",
+            "surface-variant": "#d3e4fe",
+            "on-secondary-fixed": "#00174b",
+            "secondary-fixed": "#dbe1ff",
+            "surface-container-low": "#eff4ff",
+            "on-secondary-container": "#fefcff",
+            "secondary": "#0051d5",
+            "surface-container-lowest": "#ffffff",
+            "on-surface-variant": "#45474c",
+            "outline": "#75777d",
+            "inverse-surface": "#213145",
+            "tertiary-container": "#00301e",
+            "primary-fixed": "#d8e3fb",
+            "surface-container-highest": "#d3e4fe",
+            "on-error-container": "#93000a",
+            "primary-container": "#1e293b",
+            "surface-tint": "#545f73",
+            "error": "#ba1a1a",
+            "surface": "#f8f9ff",
+            "tertiary-fixed-dim": "#4edea3",
+            "background": "#f8f9ff",
+            "secondary-fixed-dim": "#b4c5ff",
+            "error-container": "#ffdad6",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed-variant": "#005236",
+            "on-tertiary": "#ffffff",
+            "surface-container": "#e5eeff",
+            "surface-dim": "#cbdbf5",
+            "primary": "#091426",
+            "surface-container-high": "#dce9ff",
+            "primary-fixed-dim": "#bcc7de",
+            "on-tertiary-fixed": "#002113",
+            "on-background": "#0b1c30",
+            "outline-variant": "#c5c6cd",
+            "on-primary-fixed-variant": "#3c475a",
+            "tertiary-fixed": "#6ffbbe",
+            "on-primary-container": "#8590a6",
+            "on-primary": "#ffffff",
+            "secondary-container": "#316bf3",
+            "on-tertiary-container": "#00a472",
+            "inverse-on-surface": "#eaf1ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1rem",
+            "space-sm": "0.5rem",
+            "margin": "1.5rem",
+            "margin-mobile": "1rem",
+            "gutter-compact": "0.75rem",
+            "space-md": "0.75rem",
+            "space-lg": "1.25rem",
+            "space-xs": "0.25rem",
+            "space-xl": "2rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "tabular-numeric": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-xl": ["Inter"],
+            "body-sm": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "tabular-numeric": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "700" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0.005em", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-card-shadow {
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04), 0 8px 10px -6px rgba(15, 23, 42, 0.02);
+    }
+  </style>
+</head>
+<body class="h-full bg-surface-bright text-on-surface antialiased flex flex-col justify-between items-center min-h-screen px-4 py-8 sm:py-12 select-none">
+<!-- Header Ambient Minimal Brand Marker -->
+<header aria-hidden="true" class="w-full max-w-sm flex justify-center items-center opacity-0 pointer-events-none">
+<span>CallDesk Pro</span>
+</header>
+<!-- Central Centered Card Area -->
+<main class="w-full max-w-[430px] my-auto">
+<!-- Elevated White Card Container -->
+<div class="bg-surface-container-lowest border border-outline-variant/60 rounded-xl custom-card-shadow px-7 py-9 sm:px-9 sm:py-10 transition-all duration-200">
+<!-- Logo & Brand Representation -->
+<div class="flex items-center justify-center gap-3 mb-8">
+<div class="w-11 h-11 rounded-lg bg-secondary flex items-center justify-center text-on-secondary shadow-sm">
+<span class="material-symbols-outlined text-[24px]" data-icon="phone_in_talk">phone_in_talk</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">Call Center</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium -mt-1 tracking-wider uppercase text-[10px]">CallDesk Pro</span>
+</div>
+</div>
+<!-- Title & Welcoming Cue -->
+<div class="mb-6">
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight font-bold">Giriş Yap</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Çağrı ve kuyruk paneline erişmek için oturum açın.</p>
+</div>
+<!-- Form Elements -->
+<form class="space-y-4" onsubmit="event.preventDefault();">
+<!-- Field 1: Kullanıcı Adı -->
+<div class="space-y-1.5">
+<label class="block font-label-md text-label-md text-on-surface font-semibold" for="username">
+            Kullanıcı Adı
+          </label>
+<div class="relative rounded-lg">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-[19px]" data-icon="group">group</span>
+</div>
+<input autocomplete="username" class="w-full pl-10 pr-3.5 py-2.5 bg-surface-container-lowest border border-outline-variant/80 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline/70 focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/15 transition-all duration-150 h-11" id="username" name="username" placeholder="Kullanıcı adınızı girin" required="" type="text"/>
+</div>
+</div>
+<!-- Field 2: Şifre -->
+<div class="space-y-1.5">
+<label class="block font-label-md text-label-md text-on-surface font-semibold" for="password">
+            Şifre
+          </label>
+<div class="relative rounded-lg">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-[19px]" data-icon="lock">lock</span>
+</div>
+<input autocomplete="current-password" class="w-full pl-10 pr-11 py-2.5 bg-surface-container-lowest border border-outline-variant/80 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline/70 focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/15 transition-all duration-150 h-11" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<button aria-label="Şifreyi Göster veya Gizle" class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface focus:outline-none transition-colors" id="togglePassword" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility" id="eyeIcon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Auxiliary Actions: Remember Me & Forgot Password -->
+<div class="flex items-center justify-between pt-1 pb-1">
+<label class="flex items-center gap-2 cursor-pointer select-none">
+<input class="w-4 h-4 rounded text-secondary border-outline-variant/80 focus:ring-secondary/20 focus:ring-offset-0 transition-colors" id="remember" name="remember" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Beni Hatırla</span>
+</label>
+<a class="font-label-md text-label-md text-secondary hover:text-on-secondary-fixed-variant font-medium transition-colors" href="#">
+            Şifremi Unuttum?
+          </a>
+</div>
+<!-- Submit Button -->
+<div class="pt-2">
+<button class="w-full h-11 bg-secondary-container hover:bg-secondary text-on-secondary font-headline-sm text-[15px] font-semibold rounded-lg flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] transition-all duration-150" type="submit">
+<span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+<span>Giriş Yap</span>
+</button>
+</div>
+</form>
+<!-- Sub-panel Live Operational Note -->
+<div class="mt-6 pt-5 border-t border-surface-container-high/60 flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[15px] text-tertiary-fixed-dim" data-icon="verified_user" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="text-[12px] font-label-sm">256-bit SSL Güvenli Bağlantı</span>
+</div>
+<span class="text-[11px] font-tabular-numeric text-outline tabular-nums">v2.4.1</span>
+</div>
+</div>
+</main>
+<!-- Clean Minimal Footer -->
+<footer class="w-full max-w-sm text-center py-2">
+<p class="font-body-sm text-body-sm text-outline">
+      © 2025 CallDesk Pro. Tüm hakları saklıdır.
+    </p>
+</footer>
+<!-- Micro-Interactions Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const togglePassword = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+      const eyeIcon = document.getElementById('eyeIcon');
+
+      if (togglePassword && passwordInput && eyeIcon) {
+        togglePassword.addEventListener('click', () => {
+          const isPassword = passwordInput.getAttribute('type') === 'password';
+          passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+          
+          if (isPassword) {
+            eyeIcon.setAttribute('data-icon', 'visibility_off');
+            eyeIcon.textContent = 'visibility_off';
+          } else {
+            eyeIcon.setAttribute('data-icon', 'visibility');
+            eyeIcon.textContent = 'visibility';
+          }
+        });
+      }
+    });
+  </script>
+</body></html>
