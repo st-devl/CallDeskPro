@@ -1,4 +1,6 @@
 import type { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify';
+import { resolve, join } from 'node:path';
+import { existsSync, mkdirSync, unlinkSync, createReadStream } from 'node:fs';
 import { getDatabase } from '../db.js';
 import {
   validateSession,
@@ -178,5 +180,28 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
       released_count: result.changes,
       message: `${result.changes} adet kayıt havuza bırakıldı`
     });
+  });
+
+  // Anlık Yedek İndir (Yönetici)
+  fastify.get('/backup-download', async (request: FastifyRequest, reply: FastifyReply) => {
+    const backupDir = resolve(process.cwd(), './data/backups');
+    if (!existsSync(backupDir)) {
+      mkdirSync(backupDir, { recursive: true });
+    }
+
+    const tempBackupPath = join(backupDir, `callcenter-temp-backup-${Date.now()}.db`);
+    await db.backup(tempBackupPath);
+
+    const stream = createReadStream(tempBackupPath);
+    reply.header('Content-Type', 'application/x-sqlite3');
+    reply.header('Content-Disposition', 'attachment; filename="callcenter-backup.db"');
+
+    stream.on('close', () => {
+      try {
+        unlinkSync(tempBackupPath);
+      } catch {}
+    });
+
+    return reply.send(stream);
   });
 };

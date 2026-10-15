@@ -5,7 +5,11 @@ import { showToast, showConfirm } from './ui.js';
 import { renderLoginPage } from './pages/login.js';
 import { renderUsersPage } from './pages/users.js';
 import { renderRecordsPage } from './pages/records.js';
+import { renderAdminRecordsPage } from './pages/admin-records.js';
 import { renderListsPage } from './pages/lists.js';
+import { renderCallsPage } from './pages/calls.js';
+import { renderSummaryPage } from './pages/summary.js';
+import { renderSettingsPage } from './pages/settings.js';
 
 interface CurrentUser {
   id: number;
@@ -177,6 +181,17 @@ async function handleRoute() {
     return;
   }
 
+  if (hash.startsWith('#/kayitlar')) {
+    if (currentUser?.role !== 'admin') {
+      window.location.hash = '#/kayitlarim';
+      return;
+    }
+    renderAppShell((container) => {
+      renderAdminRecordsPage(container, currentUser);
+    }, 'kayitlar');
+    return;
+  }
+
   if (hash.startsWith('#/listeler')) {
     if (currentUser?.role !== 'admin') {
       window.location.hash = '#/kayitlarim';
@@ -185,6 +200,28 @@ async function handleRoute() {
     renderAppShell((container) => {
       renderListsPage(container, currentUser);
     }, 'listeler');
+    return;
+  }
+
+  if (hash.startsWith('#/gorusmeler')) {
+    if (currentUser?.role !== 'admin') {
+      window.location.hash = '#/kayitlarim';
+      return;
+    }
+    renderAppShell((container) => {
+      renderCallsPage(container, currentUser);
+    }, 'gorusmeler');
+    return;
+  }
+
+  if (hash.startsWith('#/ozet')) {
+    if (currentUser?.role !== 'admin') {
+      window.location.hash = '#/kayitlarim';
+      return;
+    }
+    renderAppShell((container) => {
+      renderSummaryPage(container, currentUser);
+    }, 'ozet');
     return;
   }
 
@@ -199,27 +236,14 @@ async function handleRoute() {
     return;
   }
 
-  // Henüz sonraki aşamalarda kodlanacak ekranlar için geçici bilgi görünümü
-  const routeMap: Record<string, string> = {
-    '#/kayitlarim': 'kayitlarim',
-    '#/kayitlar': 'kayitlar',
-    '#/listeler': 'listeler',
-    '#/gorusmeler': 'gorusmeler',
-    '#/ozet': 'ozet',
-    '#/ayarlar': 'ayarlar'
-  };
+  if (hash === '#/ayarlar') {
+    renderAppShell((container) => {
+      renderSettingsPage(container, currentUser);
+    }, 'ayarlar');
+    return;
+  }
 
-  const navKey = routeMap[hash] || 'kayitlar';
-  renderAppShell((container) => {
-    container.innerHTML = html`
-      <div class="card" style="text-align: center; padding: 3rem;">
-        <h3 style="margin-bottom: 0.5rem;">Bu ekran sonraki aşamada entegre edilecektir.</h3>
-        <p style="color: var(--text-muted); font-size: 0.875rem;">
-          Aşama 1 kapsamında Temel Güvenlik ve Kullanıcı Yönetimi tamamlanmıştır.
-        </p>
-      </div>
-    `;
-  }, navKey);
+  window.location.hash = currentUser?.role === 'admin' ? '#/kayitlar' : '#/kayitlarim';
 }
 
 window.addEventListener('hashchange', handleRoute);
