@@ -358,4 +358,27 @@ describe('Aşama 5: HTTP Rota ve Entegrasyon Testleri (fastify.inject)', () => {
     assert.equal(res500.body.includes('SQLITE'), false, 'Yanıtta SQLite kelimesi yer almamalıdır');
     assert.equal(res500.body.includes('column'), false, 'Yanıtta veritabanı detayları sızmamalıdır');
   });
+
+  test('9. Geçersiz tarihlerde calls-report ve performance-summary 400 döner', async () => {
+    // 2026-13-45 biçimsel olarak 10 karakter ama mantıksal olarak geçersiz
+    const resCalls = await app.inject({
+      method: 'GET',
+      url: '/api/organizations/calls-report?start_date=2026-13-45',
+      cookies: { session_id: adminCookie }
+    });
+    assert.equal(resCalls.statusCode, 400, 'Geçersiz start_date durumunda calls-report 400 dönmelidir');
+    const bodyCalls = JSON.parse(resCalls.body);
+    assert.ok(bodyCalls.error);
+
+    // 2026-02-31 şubat ayında olmayan gün
+    const resPerf = await app.inject({
+      method: 'GET',
+      url: '/api/organizations/performance-summary?start_date=2026-02-31&end_date=2026-02-31',
+      cookies: { session_id: adminCookie }
+    });
+    assert.equal(resPerf.statusCode, 400, 'Geçersiz tarih durumunda performance-summary 400 dönmelidir');
+    const bodyPerf = JSON.parse(resPerf.body);
+    assert.ok(bodyPerf.error);
+  });
 });
+

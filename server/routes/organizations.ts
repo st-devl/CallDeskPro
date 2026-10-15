@@ -7,7 +7,7 @@ import {
   normalizePhoneDigits,
   isValidInternationalPhone
 } from '../text.js';
-import { todayIstanbul, nowUtcIso, istanbulDayRangeUtc } from '../time.js';
+import { todayIstanbul, nowUtcIso, istanbulDayRangeUtc, isValidDateString } from '../time.js';
 
 import { requireUser, requireAdmin } from '../guards.js';
 import { buildOrgFilter } from '../filter.js';
@@ -627,25 +627,29 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
     const startDate = query.start_date ? String(query.start_date).trim() : null;
     const endDate = query.end_date ? String(query.end_date).trim() : null;
 
-    if (startDate && !/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
-      return reply.status(400).send({ error: 'Başlangıç tarihi YYYY-MM-DD formatında olmalıdır' });
+    if (startDate && !isValidDateString(startDate)) {
+      return reply.status(400).send({ error: 'Başlangıç tarihi geçerli bir YYYY-MM-DD formatında olmalıdır' });
     }
-    if (endDate && !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
-      return reply.status(400).send({ error: 'Bitiş tarihi YYYY-MM-DD formatında olmalıdır' });
+    if (endDate && !isValidDateString(endDate)) {
+      return reply.status(400).send({ error: 'Bitiş tarihi geçerli bir YYYY-MM-DD formatında olmalıdır' });
     }
 
-    if (startDate && endDate) {
-      const [startUtc, endUtc] = istanbulDayRangeUtc(startDate, endDate);
-      conditions.push('c.created_at >= ? AND c.created_at < ?');
-      params.push(startUtc, endUtc);
-    } else if (startDate) {
-      const [startUtc] = istanbulDayRangeUtc(startDate, startDate);
-      conditions.push('c.created_at >= ?');
-      params.push(startUtc);
-    } else if (endDate) {
-      const [, endUtc] = istanbulDayRangeUtc(endDate, endDate);
-      conditions.push('c.created_at < ?');
-      params.push(endUtc);
+    try {
+      if (startDate && endDate) {
+        const [startUtc, endUtc] = istanbulDayRangeUtc(startDate, endDate);
+        conditions.push('c.created_at >= ? AND c.created_at < ?');
+        params.push(startUtc, endUtc);
+      } else if (startDate) {
+        const [startUtc] = istanbulDayRangeUtc(startDate, startDate);
+        conditions.push('c.created_at >= ?');
+        params.push(startUtc);
+      } else if (endDate) {
+        const [, endUtc] = istanbulDayRangeUtc(endDate, endDate);
+        conditions.push('c.created_at < ?');
+        params.push(endUtc);
+      }
+    } catch {
+      return reply.status(400).send({ error: 'Geçersiz tarih parametresi' });
     }
 
     if (query.list_id) {
@@ -698,11 +702,17 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
     const startDate = String(query.start_date || todayIstanbul()).trim();
     const endDate = String(query.end_date || todayIstanbul()).trim();
 
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
-      return reply.status(400).send({ error: 'Tarih parametreleri YYYY-MM-DD biçiminde olmalıdır' });
+    if (!isValidDateString(startDate) || !isValidDateString(endDate)) {
+      return reply.status(400).send({ error: 'Tarih parametreleri geçerli bir YYYY-MM-DD biçiminde olmalıdır' });
     }
 
-    const [startUtc, endUtc] = istanbulDayRangeUtc(startDate, endDate);
+    let startUtc: string;
+    let endUtc: string;
+    try {
+      [startUtc, endUtc] = istanbulDayRangeUtc(startDate, endDate);
+    } catch {
+      return reply.status(400).send({ error: 'Geçersiz tarih parametresi' });
+    }
 
     // Tüm aktif/pasif aramacılar
     const agents = db.prepare(`

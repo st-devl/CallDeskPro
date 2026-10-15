@@ -60,12 +60,25 @@ export function nowUtcIso(): string {
 }
 
 /**
+ * Verilen string'in gerçek ve geçerli bir YYYY-MM-DD tarihi olup olmadığını doğrular.
+ * Gün, ay sınırları, artık yıllar ve Date nesnesi tutarlılığını denetler.
+ */
+export function isValidDateString(dateStr: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  const [y, m, d] = dateStr.split('-').map(Number);
+  if (m < 1 || m > 12 || d < 1 || d > 31) return false;
+  const date = new Date(Date.UTC(y, m - 1, d));
+  if (isNaN(date.getTime())) return false;
+  return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
+}
+
+/**
  * Verilen YYYY-MM-DD başlangıç ve bitiş tarihlerini Europe/Istanbul gün sınırlarına göre
  * [startUtcIso, endUtcIso) yarı açık UTC aralığına çevirir.
  */
 export function istanbulDayRangeUtc(startDate: string, endDate: string): [string, string] {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
-    throw new Error('Tarih formatı YYYY-MM-DD olmalıdır');
+  if (!isValidDateString(startDate) || !isValidDateString(endDate)) {
+    throw new Error('Geçersiz tarih değeri. Tarih geçerli bir YYYY-MM-DD olmalıdır');
   }
 
   // Türkiye saat dilimi UTC+3 sabittir (+03:00)
