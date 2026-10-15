@@ -12,8 +12,9 @@ import { nowUtcIso } from '../time.js';
 
 import { requireAdmin } from '../guards.js';
 
-export const adminRoutes: FastifyPluginAsync = async (fastify) => {
+export const adminRoutes: FastifyPluginAsync<{ dataDir?: string }> = async (fastify, opts) => {
   const db = getDatabase();
+  const dataDir = opts?.dataDir || resolve(process.cwd(), process.env.DATA_DIR || './data');
 
   // Yönetici Yetki Kontrolü Ön Kancası
   fastify.addHook('preHandler', requireAdmin);
@@ -173,7 +174,7 @@ export const adminRoutes: FastifyPluginAsync = async (fastify) => {
 
   // Anlık Yedek İndir (Yönetici)
   fastify.get('/backup-download', async (request: FastifyRequest, reply: FastifyReply) => {
-    const backupDir = resolve(process.cwd(), './data/backups');
+    const backupDir = join(dataDir, 'backups');
     if (!existsSync(backupDir)) {
       mkdirSync(backupDir, { recursive: true });
     }

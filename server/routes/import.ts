@@ -3,12 +3,10 @@ import crypto from 'node:crypto';
 import readXlsxFile from 'read-excel-file/node';
 import Papa from 'papaparse';
 import { getDatabase } from '../db.js';
-import { validateSession } from '../auth.js';
 import {
   normalizeSearchText,
   createSortKey,
-  normalizePhoneDigits,
-  isValidInternationalPhone
+  normalizePhoneDigits
 } from '../text.js';
 import { nowUtcIso } from '../time.js';
 
@@ -79,16 +77,18 @@ export const importRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.addHook('preHandler', requireAdmin);
 
   // Ham dosya yükleme ve önizleme (10 MB gövde sınırı)
-  fastify.post('/upload', {
-    config: {
-      rawBody: true
-    }
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/upload', async (request: FastifyRequest, reply: FastifyReply) => {
     const filenameHeader = request.headers['x-filename'];
     const listNameHeader = request.headers['x-list-name'];
 
-    const filename = filenameHeader ? decodeURIComponent(String(filenameHeader)) : 'liste.csv';
-    const listName = listNameHeader ? decodeURIComponent(String(listNameHeader)).trim() : '';
+    let filename = 'liste.csv';
+    let listName = '';
+    try {
+      if (filenameHeader) filename = decodeURIComponent(String(filenameHeader));
+      if (listNameHeader) listName = decodeURIComponent(String(listNameHeader)).trim();
+    } catch {
+      return reply.status(400).send({ error: 'Geçersiz başlık kodlaması (decodeURIComponent hatası)' });
+    }
 
     if (!listName) {
       return reply.status(400).send({ error: 'Liste adı zorunludur' });
@@ -128,13 +128,7 @@ export const importRoutes: FastifyPluginAsync = async (fastify) => {
 
         headers = (rows[0] || []).map(cell => (cell == null ? '' : String(cell).trim()));
         for (let i = 1; i < Math.min(rows.length, 11); i++) {
-          const row = (rows[i] || []).map(cell => {
-            if (cell == null) return '';
-            // Sayı formatındaki telefonların bozulmasını önleme (.0 temizleme)
-            let str = String(cell).trim();
-            if (str.endsWith('.0')) str = str.substring(0, str.length - 2);
-            return str;
-          });
+          const row = (rows[i] || []).map(cell => (cell == null ? '' : String(cell).trim()));
           previewRows.push(row);
         }
       } catch (err: any) {
@@ -204,8 +198,23 @@ export const importRoutes: FastifyPluginAsync = async (fastify) => {
     const pending = pendingImports.get(token)!;
     pendingImports.delete(token); // Tek kullanım
 
-    const orgNameIdx = mapping.organization_name;
-    if (orgNameIdx == null || orgNameIdx < 0) {
+    if (!mapping || typeof mapping !== 'object' || Array.isArray(mapping)) {
+      return reply.status(400).send({ error: 'Sütun eşleştirme (mapping) nesnesi zorunludur' });
+    }
+
+    const maxColIndex = pending.headers.length - 1;
+
+    for (const [key, val] of Object.entries(mapping)) {
+      if (val !== null && val !== undefined && val !== '') {
+        const idx = Number(val);
+        if (!Number.isInteger(idx) || idx < 0 || idx > maxColIndex) {
+          return reply.status(400).send({ error: `'${key}' alanı için geçersiz sütun indeksi: ${val}` });
+        }
+      }
+    }
+
+    const orgNameIdx = mapping.organization_name != null && mapping.organization_name !== '' ? Number(mapping.organization_name) : null;
+    if (orgNameIdx === null || orgNameIdx < 0 || orgNameIdx > maxColIndex) {
       return reply.status(400).send({ error: 'Kuruluş Adı sütunu eşleştirilmelidir' });
     }
 
@@ -361,9 +370,6 @@ export const importRoutes: FastifyPluginAsync = async (fastify) => {
     });
 
     const result = insertTx();
-
-    // İçe aktarma tamamlandığında bellek sızıntısını önlemek için tamponu hemen temizle
-    pendingImports.delete(token);
 
     return reply.send({
       success: true,

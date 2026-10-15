@@ -3,11 +3,6 @@ import { existsSync, mkdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { normalizeSearchText } from './text.js';
 
-export interface AppDatabase {
-  db: Database.Database;
-  close: () => void;
-}
-
 let dbInstance: Database.Database | null = null;
 
 export function initDatabase(dbPath: string): Database.Database {

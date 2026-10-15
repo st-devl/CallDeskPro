@@ -88,12 +88,6 @@ export function isValidInternationalPhone(phone: string | null | undefined): boo
   return digits !== null && digits.length >= 8 && digits.length <= 15;
 }
 
-/**
- * WhatsApp linki için temiz uluslararası numara döner (başında + olmadan sadece rakamlar).
- */
-export function getWhatsAppNumber(phone: string | null | undefined): string | null {
-  return normalizePhoneDigits(phone);
-}
 
 /**
  * HTML özel karakterlerini escape eder.

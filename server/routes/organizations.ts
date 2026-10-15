@@ -527,18 +527,43 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.status(400).send({ error: 'Atanacak kayıtlar seçilmelidir' });
     }
 
+    if (ids.length > 1000) {
+      return reply.status(400).send({ error: 'Tek seferde en fazla 1000 kayıt atanabilir' });
+    }
+
+    const validIds: number[] = [];
+    for (const rawId of ids) {
+      const num = Number(rawId);
+      if (!Number.isInteger(num) || num <= 0) {
+        return reply.status(400).send({ error: 'Kayıt ID listesi pozitif tam sayılardan oluşmalıdır' });
+      }
+      validIds.push(num);
+    }
+
+    let assignedUser: number | null = null;
+    if (target_user_id !== undefined && target_user_id !== null && target_user_id !== '') {
+      const targetId = parseInt(String(target_user_id), 10);
+      if (isNaN(targetId) || targetId <= 0) {
+        return reply.status(400).send({ error: 'Geçersiz hedef kullanıcı ID' });
+      }
+      const targetAgent = db.prepare('SELECT id, role, active FROM users WHERE id = ?').get(targetId) as { id: number; role: string; active: number } | undefined;
+      if (!targetAgent || targetAgent.role !== 'agent' || targetAgent.active !== 1) {
+        return reply.status(400).send({ error: 'Atama yapılacak kullanıcı aktif bir aramacı olmalıdır' });
+      }
+      assignedUser = targetId;
+    }
+
     const nowIso = nowUtcIso();
-    const assignedUser = target_user_id ? parseInt(target_user_id, 10) : null;
     const assignedAt = assignedUser ? nowIso : null;
 
-    const placeholders = ids.map(() => '?').join(',');
+    const placeholders = validIds.map(() => '?').join(',');
     const updateSql = `
       UPDATE organizations
       SET assigned_to = ?, assigned_at = ?, updated_at = ?
       WHERE id IN (${placeholders})
     `;
 
-    const res = db.prepare(updateSql).run(assignedUser, assignedAt, nowIso, ...ids);
+    const res = db.prepare(updateSql).run(assignedUser, assignedAt, nowIso, ...validIds);
 
     return reply.send({
       success: true,

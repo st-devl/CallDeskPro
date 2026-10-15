@@ -30,10 +30,23 @@ interface RateLimitEntry {
 }
 const loginAttempts = new Map<string, RateLimitEntry>();
 
+// 1 dakikada bir süresi dolmuş giriş denemelerini temizle
+const cleanupAttemptsInterval = setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of loginAttempts.entries()) {
+    if (now > entry.resetAt) {
+      loginAttempts.delete(key);
+    }
+  }
+}, 60 * 1000);
+if (cleanupAttemptsInterval.unref) {
+  cleanupAttemptsInterval.unref();
+}
+
 const MAX_LOGIN_ATTEMPTS = 5;
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 dakika
 
-export function isRateLimited(key: string): boolean {
+export function isRateLimited(key: string, maxAttempts = MAX_LOGIN_ATTEMPTS): boolean {
   const now = Date.now();
   const entry = loginAttempts.get(key);
   if (!entry) return false;
@@ -41,7 +54,7 @@ export function isRateLimited(key: string): boolean {
     loginAttempts.delete(key);
     return false;
   }
-  return entry.count >= MAX_LOGIN_ATTEMPTS;
+  return entry.count >= maxAttempts;
 }
 
 export function recordFailedLogin(key: string): void {

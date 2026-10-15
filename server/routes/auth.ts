@@ -15,6 +15,24 @@ import {
 import { nowUtcIso } from '../time.js';
 import { requireUser } from '../guards.js';
 
+// Kullanıcı adı bulunamadığında zamanlama farkını önlemek için sabit sahte hash
+const DUMMY_PASSWORD_HASH =
+  '0123456789abcdef0123456789abcdef:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+
+/**
+ * Ortak oturum çerezi seçenekleri
+ */
+function sessionCookieOptions(request: FastifyRequest, maxAgeSeconds?: number) {
+  const isSecure = process.env.NODE_ENV === 'production' || request.protocol === 'https';
+  return {
+    path: '/',
+    httpOnly: true,
+    secure: isSecure,
+    sameSite: 'strict' as const,
+    ...(maxAgeSeconds != null ? { maxAge: maxAgeSeconds } : {})
+  };
+}
+
 export const authRoutes: FastifyPluginAsync = async (fastify) => {
   const db = getDatabase();
 
@@ -28,9 +46,11 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
 
     const cleanUsername = username.toLowerCase().trim();
     const clientIp = request.ip || '127.0.0.1';
-    const rateLimitKey = `${clientIp}:${cleanUsername}`;
+    const ipUserKey = `${clientIp}:${cleanUsername}`;
+    const userOnlyKey = `user:${cleanUsername}`;
 
-    if (isRateLimited(rateLimitKey)) {
+    // IP + Kullanıcı adı için 5, Kullanıcı adı için 20 deneme sınırı (15 dk)
+    if (isRateLimited(ipUserKey, 5) || isRateLimited(userOnlyKey, 20)) {
       return reply.status(429).send({
         error: 'Çok fazla hatalı deneme yapıldı. Lütfen 15 dakika sonra tekrar deneyin.'
       });
@@ -43,17 +63,21 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
     `).get(cleanUsername) as (User & { password_hash: string }) | undefined;
 
     if (!user || user.active !== 1) {
-      recordFailedLogin(rateLimitKey);
+      await verifyPassword(password, DUMMY_PASSWORD_HASH);
+      recordFailedLogin(ipUserKey);
+      recordFailedLogin(userOnlyKey);
       return reply.status(401).send({ error: 'Kullanıcı adı veya şifre hatalı' });
     }
 
     const isValid = await verifyPassword(password, user.password_hash);
     if (!isValid) {
-      recordFailedLogin(rateLimitKey);
+      recordFailedLogin(ipUserKey);
+      recordFailedLogin(userOnlyKey);
       return reply.status(401).send({ error: 'Kullanıcı adı veya şifre hatalı' });
     }
 
-    resetLoginAttempts(rateLimitKey);
+    resetLoginAttempts(ipUserKey);
+    resetLoginAttempts(userOnlyKey);
 
     // Son giriş zamanını güncelle
     const nowIso = nowUtcIso();
@@ -62,15 +86,7 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
     const sessionDays = parseInt(process.env.SESSION_DAYS || '7', 10);
     const token = createSession(db, user.id, sessionDays);
 
-    const isSecure = process.env.NODE_ENV === 'production' || request.protocol === 'https';
-
-    reply.setCookie('session_id', token, {
-      path: '/',
-      httpOnly: true,
-      secure: isSecure,
-      sameSite: 'strict',
-      maxAge: sessionDays * 24 * 60 * 60
-    });
+    reply.setCookie('session_id', token, sessionCookieOptions(request, sessionDays * 24 * 60 * 60));
 
     return reply.send({
       user: {
@@ -89,13 +105,7 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
     if (rawToken) {
       destroySession(db, rawToken);
     }
-    const isSecure = process.env.NODE_ENV === 'production' || request.protocol === 'https';
-    reply.clearCookie('session_id', {
-      path: '/',
-      httpOnly: true,
-      secure: isSecure,
-      sameSite: 'strict'
-    });
+    reply.clearCookie('session_id', sessionCookieOptions(request));
     return reply.send({ success: true });
   });
 
@@ -120,6 +130,10 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
 
     const { current_password, new_password } = (request.body as any) || {};
 
+    if (!current_password || typeof current_password !== 'string') {
+      return reply.status(400).send({ error: 'Mevcut şifre zorunludur' });
+    }
+
     if (!new_password || typeof new_password !== 'string' || new_password.length < 10) {
       return reply.status(400).send({ error: 'Yeni şifre en az 10 karakter olmalıdır' });
     }
@@ -139,14 +153,7 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
     const sessionDays = parseInt(process.env.SESSION_DAYS || '7', 10);
     const newToken = createSession(db, user.id, sessionDays);
 
-    const isSecure = process.env.NODE_ENV === 'production' || request.protocol === 'https';
-    reply.setCookie('session_id', newToken, {
-      path: '/',
-      httpOnly: true,
-      secure: isSecure,
-      sameSite: 'strict',
-      maxAge: sessionDays * 24 * 60 * 60
-    });
+    reply.setCookie('session_id', newToken, sessionCookieOptions(request, sessionDays * 24 * 60 * 60));
 
     return reply.send({ success: true, message: 'Şifreniz başarıyla değiştirildi' });
   });

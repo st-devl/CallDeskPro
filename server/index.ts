@@ -114,7 +114,7 @@ fastify.addContentTypeParser('application/octet-stream', { parseAs: 'buffer', bo
 
 // API Rotaları
 await fastify.register(authRoutes, { prefix: '/api/auth' });
-await fastify.register(adminRoutes, { prefix: '/api/admin' });
+await fastify.register(adminRoutes, { prefix: '/api/admin', dataDir: DATA_DIR });
 await fastify.register(organizationRoutes, { prefix: '/api/organizations' });
 await fastify.register(importRoutes, { prefix: '/api/import' });
 await fastify.register(exportRoutes, { prefix: '/api/export' });
