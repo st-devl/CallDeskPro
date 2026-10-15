@@ -25,7 +25,7 @@ interface PendingImport {
 const pendingImports = new Map<string, PendingImport>();
 
 // 1 dakikada bir süresi geçmiş önizlemeleri temizle
-setInterval(() => {
+const cleanupPendingInterval = setInterval(() => {
   const now = Date.now();
   for (const [token, item] of pendingImports.entries()) {
     if (now > item.expiresAt) {
@@ -33,6 +33,9 @@ setInterval(() => {
     }
   }
 }, 60 * 1000);
+if (cleanupPendingInterval.unref) {
+  cleanupPendingInterval.unref();
+}
 
 // Otomatik sütun eşleştirme terimleri
 const FIELD_KEYWORDS: Record<string, string[]> = {
