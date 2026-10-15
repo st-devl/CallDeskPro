@@ -29,8 +29,12 @@ export function openCallPanel(options: CallPanelOptions) {
   document.body.appendChild(backdrop);
 
   // Paneli kapatma işlemi (değişiklik kontrolüyle)
+  let confirmOpen = false;
   async function handleClose() {
+    // Onay penceresi zaten açıksa ikinci bir pencere açılmaz
+    if (confirmOpen) return;
     if (isDirty) {
+      confirmOpen = true;
       const confirmed = await showConfirm(
         'Kaydedilmemiş Değişiklikler',
         'Kaydedilmemiş not veya durum bilginiz var. Kapatmak istediğinize emin misiniz?',
@@ -38,6 +42,7 @@ export function openCallPanel(options: CallPanelOptions) {
         'Vazgeç',
         true
       );
+      confirmOpen = false;
       if (!confirmed) return;
     }
     backdrop.remove();

@@ -551,7 +551,8 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  /* Arama panelinin (1500) üstünde, bildirimlerin (2000) altında */
+  z-index: 1800;
   padding: 1rem;
 }
 .modal-dialog {
