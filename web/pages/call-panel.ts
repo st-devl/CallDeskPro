@@ -17,6 +17,8 @@ export function openCallPanel(options: CallPanelOptions) {
   let callsHistory: any[] = [];
   let isDirty = false;
   let selectedStatus: 'positive' | 'negative' | 'follow_up' | null = null;
+  // Sonuç butonuna tıklandı mı? (Aynı sonucu tekrar seçmek de yeni görüşme sayılır)
+  let statusTouched = false;
   let originalUpdatedAt = '';
 
   const backdrop = document.createElement('div');
@@ -78,6 +80,7 @@ export function openCallPanel(options: CallPanelOptions) {
 
   function selectStatus(status: 'positive' | 'negative' | 'follow_up') {
     selectedStatus = status;
+    statusTouched = true;
     isDirty = true;
     updateStatusUI();
   }
@@ -353,6 +356,13 @@ export function openCallPanel(options: CallPanelOptions) {
     if (saveBtn) saveBtn.disabled = true;
     if (saveNextBtn) saveNextBtn.disabled = true;
 
+    // Yalnızca bilgi düzeltmesi (ülke, şehir, telefon vb.) yeni görüşme sayılmaz.
+    // Sonuç seçildiyse veya not/takip tarihi değiştiyse görüşme olarak kaydedilir.
+    const isNewCall =
+      statusTouched ||
+      note !== (currentRecord.note || '') ||
+      (selectedStatus === 'follow_up' && followUpDate !== (currentRecord.follow_up_date || ''));
+
     try {
       const res = await api.put(`organizations/${recordId}`, {
         country,
@@ -361,7 +371,7 @@ export function openCallPanel(options: CallPanelOptions) {
         whatsapp,
         phone,
         contact_person: contact,
-        status: selectedStatus,
+        status: isNewCall ? selectedStatus : undefined,
         note,
         follow_up_date: followUpDate,
         client_updated_at: originalUpdatedAt
