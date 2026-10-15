@@ -305,7 +305,7 @@ export function openCallPanel(options: CallPanelOptions) {
         }
       }
 
-      window.open(waUrl, 'whatsapp', 'noopener,noreferrer');
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
     });
 
     // Telefon Kopyalama

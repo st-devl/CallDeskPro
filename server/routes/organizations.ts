@@ -72,17 +72,19 @@ export const organizationRoutes: FastifyPluginAsync = async (fastify) => {
 
     let countryQuery = 'SELECT DISTINCT country FROM organizations WHERE country IS NOT NULL AND country != ""';
     let cityQuery = 'SELECT DISTINCT city FROM organizations WHERE city IS NOT NULL AND city != ""';
+    const filterParams: any[] = [];
 
     if (user.role === 'agent') {
-      countryQuery += ` AND assigned_to = ${user.id}`;
-      cityQuery += ` AND assigned_to = ${user.id}`;
+      countryQuery += ' AND assigned_to = ?';
+      cityQuery += ' AND assigned_to = ?';
+      filterParams.push(user.id);
     }
 
     countryQuery += ' ORDER BY country ASC';
     cityQuery += ' ORDER BY city ASC';
 
-    const countries = db.prepare(countryQuery).all().map((r: any) => r.country);
-    const cities = db.prepare(cityQuery).all().map((r: any) => r.city);
+    const countries = db.prepare(countryQuery).all(...filterParams).map((r: any) => r.country);
+    const cities = db.prepare(cityQuery).all(...filterParams).map((r: any) => r.city);
 
     // Listeler (Yönetici için)
     let lists: any[] = [];

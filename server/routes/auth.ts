@@ -88,7 +88,13 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
     if (rawToken) {
       destroySession(db, rawToken);
     }
-    reply.clearCookie('session_id', { path: '/' });
+    const isSecure = process.env.NODE_ENV === 'production' || request.protocol === 'https';
+    reply.clearCookie('session_id', {
+      path: '/',
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: 'strict'
+    });
     return reply.send({ success: true });
   });
 

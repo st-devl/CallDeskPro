@@ -367,6 +367,9 @@ export const importRoutes: FastifyPluginAsync = async (fastify) => {
 
     const result = insertTx();
 
+    // İçe aktarma tamamlandığında bellek sızıntısını önlemek için tamponu hemen temizle
+    pendingImports.delete(token);
+
     return reply.send({
       success: true,
       message: `${result.addedCount} kayıt başarıyla içe aktarıldı.`,
