@@ -6,6 +6,10 @@ on:
       - 'v*'
   workflow_dispatch:
 
+# GitHub Release oluşturabilmek için yazma izni gerekir (varsayılan token salt okunur)
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build & Package (Linux x64)
