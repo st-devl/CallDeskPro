@@ -142,6 +142,15 @@ export function renderListsPage(container: HTMLElement, currentUser: any) {
           <div id="upload-step-1">
             <div id="upload-alert" style="display:none;" class="auth-alert auth-alert-error"></div>
 
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem; margin-bottom: 1rem; background: var(--bg-muted); border-radius: var(--radius-md); font-size: 0.8125rem;">
+              <span style="color: var(--text-muted);">
+                Hazır sütunlu Excel şablonunu indirip doldurabilirsiniz. Kendi dosyanızı da yükleyebilirsiniz.
+              </span>
+              <a href="/ornek-liste.xlsx" download="ornek-liste.xlsx" class="btn btn-secondary" style="white-space: nowrap;">
+                ${icons.download(16)} Örnek Şablonu İndir
+              </a>
+            </div>
+
             <div class="form-group">
               <label class="form-label" for="inp-list-name">Liste Adı</label>
               <input class="form-control" type="text" id="inp-list-name" placeholder="Örn: İngiltere STK - Ekim 2026" required />

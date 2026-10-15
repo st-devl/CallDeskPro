@@ -1,7 +1,7 @@
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolve, join } from 'node:path';
-import { mkdirSync, rmSync, existsSync } from 'node:fs';
+import { mkdirSync, rmSync, existsSync, readFileSync } from 'node:fs';
 import type { FastifyInstance } from 'fastify';
 
 import { buildApp } from '../server/app.js';
@@ -379,6 +379,57 @@ describe('Aşama 5: HTTP Rota ve Entegrasyon Testleri (fastify.inject)', () => {
     assert.equal(resPerf.statusCode, 400, 'Geçersiz tarih durumunda performance-summary 400 dönmelidir');
     const bodyPerf = JSON.parse(resPerf.body);
     assert.ok(bodyPerf.error);
+  });
+
+  test('10. İndirilebilir Excel şablonu otomatik eşleşir ve içe aktarılır', async () => {
+    const templateBuffer = readFileSync(resolve(process.cwd(), 'web/public/ornek-liste.xlsx'));
+
+    const resUpload = await app.inject({
+      method: 'POST',
+      url: '/api/import/upload',
+      headers: {
+        'content-type': 'application/octet-stream',
+        'x-filename': encodeURIComponent('ornek-liste.xlsx'),
+        'x-list-name': encodeURIComponent('Şablon Test Listesi')
+      },
+      cookies: { session_id: adminCookie },
+      payload: templateBuffer
+    });
+    assert.equal(resUpload.statusCode, 200);
+    const uploadData = JSON.parse(resUpload.body);
+
+    // Şablondaki 7 sütunun tamamı elle seçim gerekmeden doğru eşleşmeli
+    assert.deepEqual(uploadData.suggestedMapping, {
+      organization_name: 0,
+      country: 1,
+      city: 2,
+      whatsapp: 3,
+      phone: 4,
+      website: 5,
+      contact_person: 6
+    });
+
+    const resConfirm = await app.inject({
+      method: 'POST',
+      url: '/api/import/confirm',
+      cookies: { session_id: adminCookie },
+      payload: {
+        token: uploadData.token,
+        listName: 'Şablon Test Listesi',
+        mapping: uploadData.suggestedMapping
+      }
+    });
+    assert.equal(resConfirm.statusCode, 200);
+    const confirmData = JSON.parse(resConfirm.body);
+    assert.equal(confirmData.added_count, 3, 'Şablondaki 3 örnek satır eklenmelidir');
+    assert.equal(confirmData.error_count, 0);
+
+    // Telefon numarası metin olarak korunmalı (bilimsel gösterime dönmemeli)
+    const row = getDatabase()
+      .prepare("SELECT whatsapp, website FROM organizations WHERE organization_name = 'Örnek Yardımlaşma Derneği'")
+      .get() as { whatsapp: string; website: string };
+    assert.equal(row.whatsapp, '+905321112233');
+    assert.equal(row.website, 'www.ornekdernek.org');
   });
 });
 
