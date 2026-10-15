@@ -4,6 +4,8 @@ import { icons } from './icons.js';
 import { showToast, showConfirm } from './ui.js';
 import { renderLoginPage } from './pages/login.js';
 import { renderUsersPage } from './pages/users.js';
+import { renderRecordsPage } from './pages/records.js';
+import { renderListsPage } from './pages/lists.js';
 
 interface CurrentUser {
   id: number;
@@ -164,7 +166,25 @@ async function handleRoute() {
   }
 
   if (hash === '#/' || hash === '') {
-    window.location.hash = currentUser?.role === 'admin' ? '#/kullanicilar' : '#/kayitlarim';
+    window.location.hash = currentUser?.role === 'admin' ? '#/kayitlar' : '#/kayitlarim';
+    return;
+  }
+
+  if (hash.startsWith('#/kayitlarim') || (currentUser?.role === 'agent' && hash.startsWith('#/kayitlar'))) {
+    renderAppShell((container) => {
+      renderRecordsPage(container, currentUser);
+    }, 'kayitlarim');
+    return;
+  }
+
+  if (hash.startsWith('#/listeler')) {
+    if (currentUser?.role !== 'admin') {
+      window.location.hash = '#/kayitlarim';
+      return;
+    }
+    renderAppShell((container) => {
+      renderListsPage(container, currentUser);
+    }, 'listeler');
     return;
   }
 

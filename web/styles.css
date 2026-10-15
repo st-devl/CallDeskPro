@@ -572,8 +572,185 @@ html, body {
   color: var(--text-muted);
 }
 
+/* Görüşme Paneli (Sağdan Açılan Drawer) */
+.panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 1500;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.panel-drawer {
+  width: 100%;
+  max-width: 580px;
+  height: 100%;
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideLeft 0.18s ease-out;
+}
+
+@keyframes slideLeft {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.panel-header {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.panel-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-top: 0.25rem;
+}
+
+.panel-body {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.panel-footer {
+  padding: 1rem 1.5rem;
+  background: var(--bg-muted);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.panel-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.panel-section-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.contact-actions-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.btn-whatsapp {
+  background-color: #25d366;
+  color: #ffffff;
+  font-weight: 600;
+}
+.btn-whatsapp:hover:not(:disabled) {
+  background-color: #1eb956;
+}
+
+/* 3 Büyük Sonuç Butonu (Disposition Selector) */
+.disposition-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.btn-disposition {
+  padding: 0.75rem 0.5rem;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-main);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.btn-disp-positive:hover, .btn-disp-positive.active {
+  background-color: var(--status-positive-bg);
+  border-color: #10b981;
+  color: var(--status-positive-text);
+}
+
+.btn-disp-negative:hover, .btn-disp-negative.active {
+  background-color: var(--status-negative-bg);
+  border-color: #ef4444;
+  color: var(--status-negative-text);
+}
+
+.btn-disp-followup:hover, .btn-disp-followup.active {
+  background-color: var(--status-followup-bg);
+  border-color: #f59e0b;
+  color: var(--status-followup-text);
+}
+
+/* Görüşme Zaman Çizelgesi */
+.history-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.history-item {
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-muted);
+  border-left: 3px solid var(--secondary);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.history-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.history-note {
+  font-size: 0.8125rem;
+  color: var(--text-main);
+  margin-top: 0.35rem;
+  white-space: pre-wrap;
+}
+
+.form-row {
+  display: flex;
+  gap: 0.75rem;
+}
+.flex-1 {
+  flex: 1;
+}
+
 /* Mobil Uyum (768px altı) */
 @media (max-width: 768px) {
+  .panel-drawer {
+    max-width: 100%;
+  }
   .app-layout {
     flex-direction: column;
   }

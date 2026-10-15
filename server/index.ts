@@ -7,6 +7,8 @@ import { initDatabase, getDatabase } from './db.js';
 import { ensureInitialAdmin, cleanupExpiredSessions } from './auth.js';
 import { authRoutes } from './routes/auth.js';
 import { adminRoutes } from './routes/admin.js';
+import { importRoutes } from './routes/import.js';
+import { organizationRoutes } from './routes/organizations.js';
 
 // .env dosyasını oku (basit, ek kütüphanesiz)
 function loadEnv() {
@@ -88,9 +90,16 @@ fastify.addHook('onRequest', async (request, reply) => {
   }
 });
 
+// Ham dosya yükleme için octet-stream desteği (10 MB'a kadar)
+fastify.addContentTypeParser('application/octet-stream', { parseAs: 'buffer', bodyLimit: 10 * 1024 * 1024 }, (_req, body, done) => {
+  done(null, body);
+});
+
 // API Rotaları
 await fastify.register(authRoutes, { prefix: '/api/auth' });
 await fastify.register(adminRoutes, { prefix: '/api/admin' });
+await fastify.register(organizationRoutes, { prefix: '/api/organizations' });
+await fastify.register(importRoutes, { prefix: '/api/import' });
 
 // Ön Yüz Statik Dosyaları (dist/web klasöründen)
 const webDistPath = resolve(process.cwd(), 'dist/web');
