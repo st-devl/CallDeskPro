@@ -17,8 +17,6 @@ export function openCallPanel(options: CallPanelOptions) {
   let callsHistory: any[] = [];
   let isDirty = false;
   let selectedStatus: 'positive' | 'negative' | 'follow_up' | null = null;
-  // Sonuç butonuna tıklandı mı? (Aynı sonucu tekrar seçmek de yeni görüşme sayılır)
-  let statusTouched = false;
   let originalUpdatedAt = '';
 
   const backdrop = document.createElement('div');
@@ -80,7 +78,6 @@ export function openCallPanel(options: CallPanelOptions) {
 
   function selectStatus(status: 'positive' | 'negative' | 'follow_up') {
     selectedStatus = status;
-    statusTouched = true;
     isDirty = true;
     updateStatusUI();
   }
@@ -119,7 +116,8 @@ export function openCallPanel(options: CallPanelOptions) {
       const res = await api.get(`organizations/${recordId}`);
       currentRecord = res.record;
       callsHistory = res.calls || [];
-      selectedStatus = currentRecord.status || null;
+      // Önceki sonuç önceden seçili gelmez; her kayıtta sonuç bilinçli olarak seçilmeli
+      selectedStatus = null;
       originalUpdatedAt = currentRecord.updated_at;
       renderDrawer();
     } catch (err: any) {
@@ -343,6 +341,15 @@ export function openCallPanel(options: CallPanelOptions) {
     const note = (drawer.querySelector('#inp-call-note') as HTMLTextAreaElement)?.value;
     const followUpDate = (drawer.querySelector('#inp-followup-date') as HTMLInputElement)?.value;
 
+    if (!selectedStatus) {
+      if (errorAlert) {
+        errorAlert.textContent = 'Kaydetmek için görüşme sonucunu seçin: Olumlu (1), Olumsuz (2) veya Tekrar Görüşülecek (3).';
+        errorAlert.style.display = 'block';
+      }
+      showToast('Lütfen görüşme sonucunu seçin (1 / 2 / 3).', 'error');
+      return;
+    }
+
     if (selectedStatus === 'follow_up' && !followUpDate) {
       if (errorAlert) {
         errorAlert.textContent = 'Tekrar görüşülecek kayıtlar için takip tarihi zorunludur.';
@@ -356,13 +363,6 @@ export function openCallPanel(options: CallPanelOptions) {
     if (saveBtn) saveBtn.disabled = true;
     if (saveNextBtn) saveNextBtn.disabled = true;
 
-    // Yalnızca bilgi düzeltmesi (ülke, şehir, telefon vb.) yeni görüşme sayılmaz.
-    // Sonuç seçildiyse veya not/takip tarihi değiştiyse görüşme olarak kaydedilir.
-    const isNewCall =
-      statusTouched ||
-      note !== (currentRecord.note || '') ||
-      (selectedStatus === 'follow_up' && followUpDate !== (currentRecord.follow_up_date || ''));
-
     try {
       const res = await api.put(`organizations/${recordId}`, {
         country,
@@ -371,7 +371,7 @@ export function openCallPanel(options: CallPanelOptions) {
         whatsapp,
         phone,
         contact_person: contact,
-        status: isNewCall ? selectedStatus : undefined,
+        status: selectedStatus,
         note,
         follow_up_date: followUpDate,
         client_updated_at: originalUpdatedAt
