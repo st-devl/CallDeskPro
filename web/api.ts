@@ -17,7 +17,13 @@ export async function apiRequest<T = any>(
   const url = path.startsWith('/') ? path : `/api/${path}`;
 
   const headers = new Headers(options.headers || {});
-  if (!headers.has('Content-Type') && !(options.body instanceof FormData) && !(options.body instanceof Blob)) {
+  // Gövdesiz isteklere JSON başlığı eklenmez (Fastify boş JSON gövdesini 400 ile reddeder)
+  if (
+    options.body != null &&
+    !headers.has('Content-Type') &&
+    !(options.body instanceof FormData) &&
+    !(options.body instanceof Blob)
+  ) {
     headers.set('Content-Type', 'application/json');
   }
 
